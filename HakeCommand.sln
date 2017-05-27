@@ -1,0 +1,53 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26430.6
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Extensions", "Extensions", "{E352EB75-0CD6-4A5F-830F-22BF2E5B6C1D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Framework", "Framework\Framework.csproj", "{122BE8CA-51A4-460D-9575-892F824BD3EF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HakeCommand", "HakeCommand\HakeCommand.csproj", "{6B9E63D0-E6D3-421C-AFA8-293F6DB1DE11}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hake.Extension.DependencyInjection.Abstraction", "Extensions\DependencyInjection\Abstraction\Hake.Extension.DependencyInjection.Abstraction.csproj", "{A3F7C9FF-E269-4756-B3DB-FB4BCDEF9308}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hake.Extension.DependencyInjection.Implementations", "Extensions\DependencyInjection\Implementations\Hake.Extension.DependencyInjection.Implementations.csproj", "{A8D22D0D-564E-4062-95E9-BC5CE2F5DF04}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hake.Extension.Pipeline.Abstraction", "Extensions\Pipeline\Abstraction\Hake.Extension.Pipeline.Abstraction.csproj", "{0A34BE72-33AB-4201-860C-93F2CB95B067}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{122BE8CA-51A4-460D-9575-892F824BD3EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{122BE8CA-51A4-460D-9575-892F824BD3EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{122BE8CA-51A4-460D-9575-892F824BD3EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{122BE8CA-51A4-460D-9575-892F824BD3EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B9E63D0-E6D3-421C-AFA8-293F6DB1DE11}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B9E63D0-E6D3-421C-AFA8-293F6DB1DE11}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B9E63D0-E6D3-421C-AFA8-293F6DB1DE11}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B9E63D0-E6D3-421C-AFA8-293F6DB1DE11}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A3F7C9FF-E269-4756-B3DB-FB4BCDEF9308}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3F7C9FF-E269-4756-B3DB-FB4BCDEF9308}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3F7C9FF-E269-4756-B3DB-FB4BCDEF9308}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3F7C9FF-E269-4756-B3DB-FB4BCDEF9308}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A8D22D0D-564E-4062-95E9-BC5CE2F5DF04}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8D22D0D-564E-4062-95E9-BC5CE2F5DF04}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8D22D0D-564E-4062-95E9-BC5CE2F5DF04}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8D22D0D-564E-4062-95E9-BC5CE2F5DF04}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0A34BE72-33AB-4201-860C-93F2CB95B067}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A34BE72-33AB-4201-860C-93F2CB95B067}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0A34BE72-33AB-4201-860C-93F2CB95B067}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0A34BE72-33AB-4201-860C-93F2CB95B067}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A3F7C9FF-E269-4756-B3DB-FB4BCDEF9308} = {E352EB75-0CD6-4A5F-830F-22BF2E5B6C1D}
+		{A8D22D0D-564E-4062-95E9-BC5CE2F5DF04} = {E352EB75-0CD6-4A5F-830F-22BF2E5B6C1D}
+		{0A34BE72-33AB-4201-860C-93F2CB95B067} = {E352EB75-0CD6-4A5F-830F-22BF2E5B6C1D}
+	EndGlobalSection
+EndGlobal

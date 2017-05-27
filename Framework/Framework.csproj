@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp1.1</TargetFramework>
+    <RootNamespace>HakeCommand.Framework</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Extensions\DependencyInjection\Abstraction\Hake.Extension.DependencyInjection.Abstraction.csproj" />
+    <ProjectReference Include="..\Extensions\DependencyInjection\Implementations\Hake.Extension.DependencyInjection.Implementations.csproj" />
+    <ProjectReference Include="..\Extensions\Pipeline\Abstraction\Hake.Extension.Pipeline.Abstraction.csproj" />
+  </ItemGroup>
+
+</Project>
