@@ -1,8 +1,11 @@
 ﻿using Hake.Extension.DependencyInjection.Abstraction;
 using HakeCommand.Framework.Host.InternalImplements;
-using HakeCommand.Framework.Output;
+using HakeCommand.Framework.Services.Environment;
+using HakeCommand.Framework.Services.Output;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 using System.Text;
 
 namespace HakeCommand.Framework.Host
@@ -42,8 +45,11 @@ namespace HakeCommand.Framework.Host
         private void ConfigureInternalServices(IServiceCollection pool)
         {
             pool.Add(ServiceDescriptor.Singleton<IAppBuilder>(appBuilder));
-
-            pool.Add(ServiceDescriptor.Singleton<IOutput, Output.InternalImplements.Output>());
+            pool.Add(ServiceDescriptor.Singleton<IOutput, Output>());
+            pool.Add(ServiceDescriptor.Singleton<IEnvironment, Services.Environment.Environment>(services =>
+            {
+                return new Services.Environment.Environment("C:");
+            }));
         }
     }
 }

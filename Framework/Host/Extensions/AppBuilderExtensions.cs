@@ -41,7 +41,12 @@ namespace HakeCommand.Framework.Host
             {
                 IServiceProvider services = builder.Services;
                 object instance = services.CreateInstance(type, next);
-                object result = ObjectFactory.InvokeMethod(instance, method, services, context, next);
+                int length = context.Command.Arguments.Length;
+                object[] parameters = new object[length + 2];
+                parameters[0] = context;
+                parameters[1] = next;
+                Array.Copy(context.Command.Arguments, 0, parameters, 2, length);
+                object result = ObjectFactory.InvokeMethod(instance, method, services, context.Command.Options, parameters);
                 if (result != null && result is Task)
                     return result as Task;
                 return next();

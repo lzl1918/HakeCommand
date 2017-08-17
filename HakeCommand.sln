@@ -1,19 +1,21 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.6
+VisualStudioVersion = 15.0.26730.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Extensions", "Extensions", "{E352EB75-0CD6-4A5F-830F-22BF2E5B6C1D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Framework", "Framework\Framework.csproj", "{122BE8CA-51A4-460D-9575-892F824BD3EF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Framework", "Framework\Framework.csproj", "{122BE8CA-51A4-460D-9575-892F824BD3EF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HakeCommand", "HakeCommand\HakeCommand.csproj", "{6B9E63D0-E6D3-421C-AFA8-293F6DB1DE11}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HakeCommand", "HakeCommand\HakeCommand.csproj", "{6B9E63D0-E6D3-421C-AFA8-293F6DB1DE11}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hake.Extension.DependencyInjection.Abstraction", "Extensions\DependencyInjection\Abstraction\Hake.Extension.DependencyInjection.Abstraction.csproj", "{A3F7C9FF-E269-4756-B3DB-FB4BCDEF9308}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hake.Extension.DependencyInjection.Implementations", "Extensions\DependencyInjection\Implementations\Hake.Extension.DependencyInjection.Implementations.csproj", "{A8D22D0D-564E-4062-95E9-BC5CE2F5DF04}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hake.Extension.Pipeline.Abstraction", "Extensions\Pipeline\Abstraction\Hake.Extension.Pipeline.Abstraction.csproj", "{0A34BE72-33AB-4201-860C-93F2CB95B067}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommandTest", "CommandTest\CommandTest.csproj", "{05A8E479-9261-40BD-8B4B-0AA3F2BA2EB7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,6 +43,10 @@ Global
 		{0A34BE72-33AB-4201-860C-93F2CB95B067}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0A34BE72-33AB-4201-860C-93F2CB95B067}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0A34BE72-33AB-4201-860C-93F2CB95B067}.Release|Any CPU.Build.0 = Release|Any CPU
+		{05A8E479-9261-40BD-8B4B-0AA3F2BA2EB7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{05A8E479-9261-40BD-8B4B-0AA3F2BA2EB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{05A8E479-9261-40BD-8B4B-0AA3F2BA2EB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{05A8E479-9261-40BD-8B4B-0AA3F2BA2EB7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -49,5 +55,8 @@ Global
 		{A3F7C9FF-E269-4756-B3DB-FB4BCDEF9308} = {E352EB75-0CD6-4A5F-830F-22BF2E5B6C1D}
 		{A8D22D0D-564E-4062-95E9-BC5CE2F5DF04} = {E352EB75-0CD6-4A5F-830F-22BF2E5B6C1D}
 		{0A34BE72-33AB-4201-860C-93F2CB95B067} = {E352EB75-0CD6-4A5F-830F-22BF2E5B6C1D}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {69144717-841B-4FFA-89C6-CC09A563AAF3}
 	EndGlobalSection
 EndGlobal

@@ -7,6 +7,8 @@ namespace HakeCommand
     {
         public static void Main(string[] args)
         {
+            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+
             IHost host = new HostBuilder()
                 .UseConfiguration<HostConfiguration>()
                 .Build();

@@ -5,6 +5,19 @@
     <RootNamespace>HakeCommand.Framework</RootNamespace>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>TRACE;DEBUG;NETCOREAPP1_1;_DEBUG</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Services\HistoryProvider.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="4.4.0" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Extensions\DependencyInjection\Abstraction\Hake.Extension.DependencyInjection.Abstraction.csproj" />
     <ProjectReference Include="..\Extensions\DependencyInjection\Implementations\Hake.Extension.DependencyInjection.Implementations.csproj" />

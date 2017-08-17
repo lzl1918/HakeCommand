@@ -19,7 +19,7 @@ namespace HakeCommand.Framework.Host.InternalImplements
 
         public HostContext(string command)
         {
-            Command = Framework.Command.InternalImplements.Command.ParseCommand(command);
+            Command = InternalCommand.Parse(command);
         }
     }
 }

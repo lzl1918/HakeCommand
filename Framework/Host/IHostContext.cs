@@ -8,6 +8,5 @@ namespace HakeCommand.Framework.Host
         ICommand Command { get; }
         object Result { get; }
         void SetResult(object result);
-
     }
 }

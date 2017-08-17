@@ -8,10 +8,10 @@ namespace HakeCommand.Framework.Command
     {
         string Raw { get; }
         string Command { get; }
-        string Action { get; }
+        object[] Arguments { get; }
+        IReadOnlyDictionary<string, object> Options { get; }
 
-        object[] UnnamedArguments { get; }
-        IReadOnlyDictionary<string, object> NamedArguments { get; }
-
+        bool ContainsError { get; }
+        string ErrorMessage { get; }
     }
 }
