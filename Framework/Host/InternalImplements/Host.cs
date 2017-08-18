@@ -1,6 +1,6 @@
 ﻿using Hake.Extension.DependencyInjection.Abstraction;
 using HakeCommand.Framework.Services.Environment;
-using HakeCommand.Framework.Services.Output;
+using HakeCommand.Framework.Services.OutputEngine;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -15,12 +15,12 @@ namespace HakeCommand.Framework.Host.InternalImplements
         private IServiceProvider services;
         private IAppBuilder appBuilder;
         private IEnvironment hostEnv;
-        private IOutput output;
+        private IOutputEngine output;
 
         private AutoResetEvent mainblock;
 
         public Host(IServiceProvider services, IServiceCollection pool, IAppBuilder appBuilder,
-            IEnvironment hostEnv, IOutput output)
+            IEnvironment hostEnv, IOutputEngine output)
         {
             this.services = services;
             this.pool = pool;
@@ -46,20 +46,33 @@ namespace HakeCommand.Framework.Host.InternalImplements
             output.WriteSplash();
             while (true)
             {
-                foreach (var desc in pool.GetDescriptors())
-                    desc.EnterScope();
-
                 output.WriteScopeBegin(hostEnv);
                 string command = Console.ReadLine();
                 if (command == null)
                     break;
-                HostContext context = new HostContext(command);
-                AppDelegate app = appBuilder.Build();
-                await app(context);
-                output.OutputObject(context.Result);
+                IInputCollection inputCollection = InternalInput.Parse(command);
+                if (inputCollection.ContainsError)
+                {
+                    output.WriteError(inputCollection.ErrorMessage);
+                }
+                else
+                {
+                    foreach (var desc in pool.GetDescriptors())
+                        desc.EnterScope();
 
-                foreach (var desc in pool.GetDescriptors())
-                    desc.LeaveScope();
+                    object inputObject = null;
+                    foreach (IInput input in inputCollection.Inputs)
+                    {
+                        HostContext context = new HostContext(input, inputObject);
+                        AppDelegate app = appBuilder.Build();
+                        await app(context);
+                        inputObject = context.Result;
+                    }
+                    output.WriteObject(inputObject);
+
+                    foreach (var desc in pool.GetDescriptors())
+                        desc.LeaveScope();
+                }
             }
         }
     }

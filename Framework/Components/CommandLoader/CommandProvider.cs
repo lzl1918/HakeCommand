@@ -20,7 +20,7 @@ namespace HakeCommand.Framework.Components.CommandLoader
         public CommandRecord MatchCommand(IHostContext context)
         {
             CommandRecord record;
-            if (commands.TryGetValue(context.Command.Command, out record))
+            if (commands.TryGetValue(context.Command.Name, out record))
                 return record;
             else
                 return null;

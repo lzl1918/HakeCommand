@@ -19,7 +19,9 @@ namespace HakeCommand.Framework
     }
 
 
-    public abstract class CommandSet
+    [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = false)]
+    public sealed class PathAttribute : Attribute
     {
+
     }
 }

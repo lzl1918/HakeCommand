@@ -1,8 +1,9 @@
-﻿using HakeCommand.Framework.Command;
+﻿using HakeCommand.Framework.Services.OutputEngine;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using Hake.Extension.DependencyInjection.Abstraction;
 
 namespace HakeCommand.Framework.Host.InternalImplements
 {
@@ -14,33 +15,16 @@ namespace HakeCommand.Framework.Host.InternalImplements
         public AppBuilder(IServiceProvider services)
         {
             Services = services;
-
-            // block syntax errors
-            this.Use(next =>
-            {
-                return context =>
-                {
-                    ICommand inputCommand = context.Command;
-                    if (inputCommand.ContainsError)
-                    {
-                        context.SetResult(inputCommand.ErrorMessage);
-                        return Task.CompletedTask;
-                    }
-                    else if (inputCommand.Command == null || inputCommand.Command.Length <= 0)
-                        return Task.CompletedTask;
-                    else
-                        return next(context);
-                };
-            });
         }
 
         public AppDelegate Build()
         {
             AppDelegate app = context =>
             {
-                ICommand inputCommand = context.Command;
-                string result = $"command not found: {inputCommand.Command}";
-                context.SetResult(result);
+                IOutputEngine outputEngine = Services.GetService<IOutputEngine>();
+                IInput inputCommand = context.Command;
+                string error = $"command not found: {inputCommand.Name}";
+                outputEngine.WriteError(error);
                 return Task.CompletedTask;
             };
             foreach (Func<AppDelegate, AppDelegate> component in components)

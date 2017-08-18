@@ -10,26 +10,40 @@ namespace HakeCommand.Commands
     public sealed class ListContentCommands : CommandSet
     {
         [Command("ls")]
-        public string ListContent(IEnvironment env, string path)
+        public IList<FileSystemInfo> ListContent([Path]DirectoryInfo path)
         {
-            if (path == null)
-                path = env.WorkingDirectory.FullName;
-            else
-                path = Path.Combine(env.WorkingDirectory.FullName, path);
-            DirectoryInfo directoryInfo = new DirectoryInfo(path);
-            if (!directoryInfo.Exists)
-                return $"can not find directory: {directoryInfo.FullName}";
-            else
-            {
-                var files = directoryInfo.EnumerateFiles();
-                var directories = directoryInfo.EnumerateDirectories();
-                StringBuilder builder = new StringBuilder();
-                foreach (DirectoryInfo dir in directories)
-                    builder.AppendLine(dir.Name);
-                foreach (FileInfo file in files)
-                    builder.AppendLine(file.Name);
-                return builder.ToString();
-            }
+            if (!path.Exists)
+                throw new Exception($"directory does not exist: {path.FullName}");
+
+            var files = path.EnumerateFiles();
+            var directories = path.EnumerateDirectories();
+            List<FileSystemInfo> result = new List<FileSystemInfo>();
+            result.AddRange(directories);
+            result.AddRange(files);
+            return result;
+        }
+
+        [Command("cat")]
+        public string ShowFileContent([Path]FileInfo file)
+        {
+            if (file == null)
+                throw new Exception("missing target name");
+            if (!file.Exists)
+                throw new Exception($"file does not exist: {file.FullName}");
+
+            Stream stream = file.OpenRead();
+            StreamReader reader = new StreamReader(stream);
+            string content = reader.ReadToEnd();
+            reader.Dispose();
+            stream.Dispose();
+            return content;
+        }
+
+        [Command("echo")]
+        public object ShowContent(object content)
+        {
+            content = content ?? InputObject;
+            return content;
         }
     }
 }

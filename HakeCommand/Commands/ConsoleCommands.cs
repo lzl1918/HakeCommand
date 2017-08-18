@@ -1,6 +1,7 @@
 ﻿using HakeCommand.Framework;
 using HakeCommand.Framework.Services.Environment;
-using HakeCommand.Framework.Services.Output;
+using HakeCommand.Framework.Services.OutputEngine;
+using System;
 using System.IO;
 
 namespace HakeCommand.Commands
@@ -9,23 +10,17 @@ namespace HakeCommand.Commands
     {
         [Command("cls")]
         [Command("clear")]
-        public void ClearConsole(IOutput output)
+        public void ClearConsole(IOutputEngine output)
         {
             output.Clear();
         }
 
         [Command("cd")]
-        public void SetWorkingDirectory(IEnvironment env, IOutput output, string path)
+        public void SetWorkingDirectory(IEnvironment env, [Path]DirectoryInfo path)
         {
-            if (path == null)
-                path = env.WorkingDirectory.FullName;
-            else
-                path = Path.Combine(env.WorkingDirectory.FullName, path);
-            DirectoryInfo directoryInfo = new DirectoryInfo(path);
-            if (!directoryInfo.Exists)
-                output.OutputObject($"directory not exists: {directoryInfo.FullName}");
-            else
-                env.SetDirectory(path);
+            if (!path.Exists)
+                throw new Exception($"directory does not exist: {path.FullName}");
+            env.SetDirectory(path.FullName);
         }
     }
 }

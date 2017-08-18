@@ -1,12 +1,12 @@
 ﻿using Hake.Extension.Pipeline.Abstraction;
-using HakeCommand.Framework.Command;
 
 namespace HakeCommand.Framework.Host
 {
     public interface IHostContext : IContext
     {
-        ICommand Command { get; }
+        IInput Command { get; }
         object Result { get; }
+        object InputObject { get; }
         void SetResult(object result);
     }
 }
