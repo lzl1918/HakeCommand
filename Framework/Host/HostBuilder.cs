@@ -1,5 +1,6 @@
 ﻿using Hake.Extension.DependencyInjection.Abstraction;
 using HakeCommand.Framework.Host.InternalImplements;
+using HakeCommand.Framework.Input;
 using HakeCommand.Framework.Services.Environment;
 using HakeCommand.Framework.Services.OutputEngine;
 using HakeCommand.Framework.Services.VariableService;
@@ -45,6 +46,7 @@ namespace HakeCommand.Framework.Host
 
         private void ConfigureInternalServices(IServiceCollection pool)
         {
+            pool.Add(ServiceDescriptor.Singleton<IHostInput, HostInput>());
             pool.Add(ServiceDescriptor.Singleton<IVariableService, InternalVariableService>());
             pool.Add(ServiceDescriptor.Singleton<IAppBuilder>(appBuilder));
             pool.Add(ServiceDescriptor.Singleton<IOutputEngine, InternalOutputEngine>());

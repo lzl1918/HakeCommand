@@ -1,4 +1,5 @@
 ﻿using Hake.Extension.DependencyInjection.Abstraction;
+using HakeCommand.Framework.Input;
 using HakeCommand.Framework.Services.Environment;
 using HakeCommand.Framework.Services.OutputEngine;
 using System;
@@ -16,17 +17,19 @@ namespace HakeCommand.Framework.Host.InternalImplements
         private IAppBuilder appBuilder;
         private IEnvironment hostEnv;
         private IOutputEngine output;
+        private HostInput hostInput;
 
         private AutoResetEvent mainblock;
 
         public Host(IServiceProvider services, IServiceCollection pool, IAppBuilder appBuilder,
-            IEnvironment hostEnv, IOutputEngine output)
+            IEnvironment hostEnv, IOutputEngine output, IHostInput hostInput)
         {
             this.services = services;
             this.pool = pool;
             this.appBuilder = appBuilder;
             this.hostEnv = hostEnv;
             this.output = output;
+            this.hostInput = hostInput as HostInput;
         }
 
         public void Run()
@@ -47,7 +50,7 @@ namespace HakeCommand.Framework.Host.InternalImplements
             while (true)
             {
                 output.WriteScopeBegin(hostEnv);
-                string command = Console.ReadLine();
+                string command = hostInput.ReadCommandLine();
                 if (command == null)
                     break;
                 IInputCollection inputCollection = InternalInput.Parse(command);

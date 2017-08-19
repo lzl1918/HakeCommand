@@ -24,5 +24,9 @@
             else if ("-_+*^&#@(){}[].:;/".IndexOf(ch) >= 0) return true;
             return false;
         }
+        public static bool IsValidChar(this char ch)
+        {
+            return ch == InternalInput.ESCAPE_CHAR || ch == '|' || IsWhiteSpace(ch) || IsVaildFirstCharacter(ch) || IsChar(ch);
+        }
     }
 }

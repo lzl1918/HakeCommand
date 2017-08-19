@@ -11,6 +11,8 @@ namespace HakeCommand.Framework
 #endif
     sealed class InternalInput : IInput
     {
+        internal const char ESCAPE_CHAR = '`';
+
         public string Name { get; }
         public object[] Arguments { get; }
         public IReadOnlyDictionary<string, object> Options { get; }
@@ -42,7 +44,6 @@ namespace HakeCommand.Framework
 #endif
         static IInputCollection Parse(string input)
         {
-            char escapeChar = '`';
             string raw = input;
             string name = "";
             string errorMessage = null;
@@ -157,7 +158,7 @@ namespace HakeCommand.Framework
                     { state = 3; }
                     else if (ch == '"')
                     { state = 6; }
-                    else if (ch == escapeChar)
+                    else if (ch == ESCAPE_CHAR)
                     { state = 5; }
                     else if (ch.IsVaildFirstCharacter())
                     { valueBuilder.Append(ch); state = 4; }
@@ -181,7 +182,7 @@ namespace HakeCommand.Framework
                     { valueArray.Add(valueBuilder.ToString()); valueBuilder.Clear(); state = 9; }
                     else if (ch == '|')
                     { arguments.Add(valueBuilder.ToString()); valueBuilder.Clear(); iinput = new InternalInput(name, arguments.ToArray(), new Dictionary<string, object>(options)); arguments.Clear(); options.Clear(); inputs.Add(iinput); name = ""; state = 0; }
-                    else if (ch == escapeChar)
+                    else if (ch == ESCAPE_CHAR)
                     { state = 5; }
                     else if (ch.IsWhiteSpace())
                     { arguments.Add(valueBuilder.ToString()); valueBuilder.Clear(); state = 2; }
@@ -199,7 +200,7 @@ namespace HakeCommand.Framework
                 {
                     if (ch == '"')
                     { state = 10; }
-                    else if (ch == escapeChar)
+                    else if (ch == ESCAPE_CHAR)
                     { state = 7; }
                     else
                     { valueBuilder.Append(ch); }
@@ -240,7 +241,7 @@ namespace HakeCommand.Framework
                     { state = 15; }
                     else if (ch == ';')
                     { }
-                    else if (ch == escapeChar)
+                    else if (ch == ESCAPE_CHAR)
                     { state = 12; }
                     else if (ch.IsVaildFirstCharacter())
                     { valueBuilder.Append(ch); state = 13; }
@@ -266,7 +267,7 @@ namespace HakeCommand.Framework
                     { options.Add(key, true); iinput = new InternalInput(name, arguments.ToArray(), new Dictionary<string, object>(options)); arguments.Clear(); options.Clear(); inputs.Add(iinput); name = ""; state = 0; }
                     else if (ch == '"')
                     { state = 19; }
-                    else if (ch == escapeChar)
+                    else if (ch == ESCAPE_CHAR)
                     { state = 18; }
                     else if (ch == '-' || ch == '/')
                     { options[key] = true; state = 3; }
@@ -288,7 +289,7 @@ namespace HakeCommand.Framework
                     { valueArray.Add(valueBuilder.ToString()); valueBuilder.Clear(); arguments.Add(valueArray.ToArray()); valueArray.Clear(); iinput = new InternalInput(name, arguments.ToArray(), new Dictionary<string, object>(options)); arguments.Clear(); options.Clear(); inputs.Add(iinput); name = ""; state = 0; }
                     else if (ch == ';')
                     { valueArray.Add(valueBuilder.ToString()); valueBuilder.Clear(); state = 9; }
-                    else if (ch == escapeChar)
+                    else if (ch == ESCAPE_CHAR)
                     { state = 12; }
                     else if (ch.IsChar())
                     { valueBuilder.Append(ch); }
@@ -310,7 +311,7 @@ namespace HakeCommand.Framework
                 {
                     if (ch == '"')
                     { state = 14; }
-                    else if (ch == escapeChar)
+                    else if (ch == ESCAPE_CHAR)
                     { state = 16; }
                     else
                     { valueBuilder.Append(ch); }
@@ -326,7 +327,7 @@ namespace HakeCommand.Framework
                     { options[key] = valueBuilder.ToString(); valueBuilder.Clear(); state = 2; }
                     else if (ch == '|')
                     { options[key] = valueBuilder.ToString(); valueBuilder.Clear(); iinput = new InternalInput(name, arguments.ToArray(), new Dictionary<string, object>(options)); arguments.Clear(); options.Clear(); inputs.Add(iinput); name = ""; state = 0; }
-                    else if (ch == escapeChar)
+                    else if (ch == ESCAPE_CHAR)
                     { state = 18; }
                     else if (ch == ';')
                     { valueArray.Add(valueBuilder.ToString()); valueBuilder.Clear(); state = 21; }
@@ -342,7 +343,7 @@ namespace HakeCommand.Framework
                 }
                 else if (state == 19)
                 {
-                    if (ch == escapeChar)
+                    if (ch == ESCAPE_CHAR)
                     { state = 20; }
                     else if (ch == '"')
                     { state = 22; }
@@ -374,7 +375,7 @@ namespace HakeCommand.Framework
                     { state = 26; }
                     else if (ch == ';')
                     { }
-                    else if (ch == escapeChar)
+                    else if (ch == ESCAPE_CHAR)
                     { state = 23; }
                     else if (ch.IsVaildFirstCharacter())
                     { valueBuilder.Append(ch); state = 24; }
@@ -405,7 +406,7 @@ namespace HakeCommand.Framework
                     { valueArray.Add(valueBuilder.ToString()); valueBuilder.Clear(); options[key] = valueArray.ToArray(); valueArray.Clear(); iinput = new InternalInput(name, arguments.ToArray(), new Dictionary<string, object>(options)); arguments.Clear(); options.Clear(); inputs.Add(iinput); name = ""; state = 0; }
                     else if (ch == ';')
                     { valueArray.Add(valueBuilder.ToString()); valueBuilder.Clear(); state = 21; }
-                    else if (ch == escapeChar)
+                    else if (ch == ESCAPE_CHAR)
                     { state = 23; }
                     else if (ch.IsChar())
                     { valueBuilder.Append(ch); }
@@ -427,7 +428,7 @@ namespace HakeCommand.Framework
                 {
                     if (ch == '"')
                     { state = 25; }
-                    else if (ch == escapeChar)
+                    else if (ch == ESCAPE_CHAR)
                     { state = 27; }
                     else
                     { valueBuilder.Append(ch); }

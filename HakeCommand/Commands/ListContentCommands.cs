@@ -1,5 +1,6 @@
 ﻿using HakeCommand.Framework;
 using HakeCommand.Framework.Services.Environment;
+using HakeCommand.Framework.Services.OutputEngine;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,11 +11,13 @@ namespace HakeCommand.Commands
     public sealed class ListContentCommands : CommandSet
     {
         [Command("ls")]
-        public IList<FileSystemInfo> ListContent([Path]DirectoryInfo path)
+        public IList<FileSystemInfo> ListContent([Path]DirectoryInfo path, IOutputEngine output)
         {
             if (!path.Exists)
                 throw new Exception($"directory does not exist: {path.FullName}");
 
+            output.WriteObject($"{path}");
+            output.WriteObject("");
             var files = path.EnumerateFiles();
             var directories = path.EnumerateDirectories();
             List<FileSystemInfo> result = new List<FileSystemInfo>();
