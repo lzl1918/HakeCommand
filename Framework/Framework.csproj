@@ -1,12 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp1.1</TargetFramework>
+    <OutputType>library</OutputType>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
     <RootNamespace>HakeCommand.Framework</RootNamespace>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>TRACE;DEBUG;NETCOREAPP1_1;_DEBUG</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,13 +11,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Extensions\DependencyInjection\Abstraction\Hake.Extension.DependencyInjection.Abstraction.csproj" />
-    <ProjectReference Include="..\Extensions\DependencyInjection\Implementations\Hake.Extension.DependencyInjection.Implementations.csproj" />
-    <ProjectReference Include="..\Extensions\Pipeline\Abstraction\Hake.Extension.Pipeline.Abstraction.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Objects\" />
+    <ProjectReference Include="..\Extensions\DependencyInjection\Hake.Extension.DependencyInjection\Hake.Extension.DependencyInjection.csproj" />
+    <ProjectReference Include="..\Extensions\Pipeline\Hake.Extension.Pipeline\Hake.Extension.Pipeline.csproj" />
   </ItemGroup>
 
 </Project>

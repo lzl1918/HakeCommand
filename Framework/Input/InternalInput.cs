@@ -4,7 +4,7 @@ using System.Text;
 
 namespace HakeCommand.Framework
 {
-#if _DEBUG
+#if DEBUG
     public
 #else
     internal
@@ -37,7 +37,7 @@ namespace HakeCommand.Framework
             ContainsError = true;
         }
 
-#if _DEBUG
+#if DEBUG
         public
 #else
         internal
