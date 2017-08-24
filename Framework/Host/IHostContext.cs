@@ -1,4 +1,5 @@
 ﻿using Hake.Extension.Pipeline.Abstraction;
+using System;
 
 namespace HakeCommand.Framework.Host
 {
@@ -12,5 +13,7 @@ namespace HakeCommand.Framework.Host
         int PipeIndex { get; }
 
         bool WriteResult { get; set; }
+        Exception Exception { get; set; }
+        bool ErrorOccured { get; }
     }
 }

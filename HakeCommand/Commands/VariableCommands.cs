@@ -11,14 +11,10 @@ namespace HakeCommand.Commands
     public sealed class VariableCommands : CommandSet
     {
         private IVariableService variableService;
-        private IHostInput hostInput;
-        private IOutputEngine outputEngine;
 
-        public VariableCommands(IVariableService variableService, IHostInput hostInput, IOutputEngine outputEngine)
+        public VariableCommands(IVariableService variableService)
         {
             this.variableService = variableService;
-            this.hostInput = hostInput;
-            this.outputEngine = outputEngine;
         }
 
         [Command("set")]
@@ -28,15 +24,13 @@ namespace HakeCommand.Commands
             try
             {
                 if (name == null)
-                {
-                    outputEngine.WriteHint("variable name: ");
-                    name = hostInput.ReadLine();
-                }
+                    name = ReadLine("variable name");
                 return variableService.Set(name, value);
             }
-            catch
+            catch (Exception ex)
             {
-                throw;
+                SetException(ex);
+                return null;
             }
         }
 
@@ -46,15 +40,13 @@ namespace HakeCommand.Commands
             try
             {
                 if (name == null)
-                {
-                    outputEngine.WriteHint("variable name: ");
-                    name = hostInput.ReadLine();
-                }
+                    name = ReadLine("variable name");
                 return variableService.Get(name);
             }
-            catch
+            catch (Exception ex)
             {
-                throw;
+                SetException(ex);
+                return null;
             }
         }
     }

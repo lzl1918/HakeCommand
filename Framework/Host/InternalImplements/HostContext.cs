@@ -18,6 +18,9 @@ namespace HakeCommand.Framework.Host.InternalImplements
         public int PipeIndex { get; }
 
         public bool WriteResult { get; set; }
+        public Exception Exception { get; set; }
+
+        public bool ErrorOccured { get { return Exception != null; } }
 
         public void SetResult(object result)
         {

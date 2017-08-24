@@ -10,17 +10,17 @@ namespace HakeCommand.Commands
     {
         [Command("cls")]
         [Command("clear")]
-        public void ClearConsole(IOutputEngine output)
+        public void ClearConsole()
         {
-            output.Clear();
+            OutputEngine.Clear();
         }
 
         [Command("cd")]
-        public void SetWorkingDirectory(IEnvironment env, [Path]DirectoryInfo path)
+        public void SetWorkingDirectory([Path]DirectoryInfo path)
         {
             if (!path.Exists)
-                throw new Exception($"directory does not exist: {path.FullName}");
-            env.SetDirectory(path.FullName);
+                SetExceptionAndThrow(new Exception($"directory does not exist: {path.FullName}"));
+            Environment.SetDirectory(path.FullName);
         }
 
         [Command("slient")]

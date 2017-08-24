@@ -1,4 +1,5 @@
 ﻿using HakeCommand.Framework;
+using HakeCommand.Framework.Input;
 using HakeCommand.Framework.Services.Environment;
 using HakeCommand.Framework.Services.OutputEngine;
 using System;
@@ -11,15 +12,15 @@ namespace HakeCommand.Commands
     public sealed class ListContentCommands : CommandSet
     {
         [Command("ls")]
-        public IList<FileSystemInfo> ListContent([Path]DirectoryInfo path, IOutputEngine output)
+        public IList<FileSystemInfo> ListContent([Path]DirectoryInfo path)
         {
             if (!path.Exists)
-                throw new Exception($"directory does not exist: {path.FullName}");
+                SetExceptionAndThrow(new Exception($"directory does not exist: {path.FullName}"));
 
             if (!Context.InPipe)
             {
-                output.WriteObject($"{path}");
-                output.WriteObject("");
+                OutputEngine.WriteObject($"{path}");
+                OutputEngine.WriteObject("");
             }
             var files = path.EnumerateFiles();
             var directories = path.EnumerateDirectories();
@@ -33,9 +34,12 @@ namespace HakeCommand.Commands
         public string ShowFileContent([Path]FileInfo file)
         {
             if (file == null)
-                throw new Exception("missing target name");
+            {
+                string input = ReadLine("file path");
+                file = new FileInfo(Path.Combine(Environment.WorkingDirectory.FullName, input));
+            }
             if (!file.Exists)
-                throw new Exception($"file does not exist: {file.FullName}");
+                SetExceptionAndThrow(new Exception($"file does not exist: {file.FullName}"));
 
             Stream stream = file.OpenRead();
             StreamReader reader = new StreamReader(stream);

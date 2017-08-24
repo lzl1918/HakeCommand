@@ -1,5 +1,6 @@
 ﻿using Hake.Extension.DependencyInjection.Abstraction;
 using HakeCommand.Framework.Host;
+using HakeCommand.Framework.Input;
 using HakeCommand.Framework.Services.Environment;
 using HakeCommand.Framework.Services.OutputEngine;
 using System;
@@ -29,7 +30,8 @@ namespace HakeCommand.Framework.Components.CommandLoader
             }
             return builder.ToString();
         }
-        public Task Invoke(IHostContext context, Func<Task> next, IServiceProvider services, ICommandProvider commandProvider, IEnvironment env, IOutputEngine outputEngine)
+        public Task Invoke(IHostContext context, Func<Task> next,
+            IServiceProvider services, ICommandProvider commandProvider, IEnvironment env, IOutputEngine outputEngine, IHostInput hostInput)
         {
             IInput input = context.Command;
             if (input.Name == "help")
@@ -58,6 +60,8 @@ namespace HakeCommand.Framework.Components.CommandLoader
                 instance.Context = context;
                 instance.InputObject = context.InputObject;
                 instance.OutputEngine = outputEngine;
+                instance.HostInput = hostInput;
+                instance.Environment = env;
                 object value;
                 if (pathIndices.Count <= 0)
                     value = ObjectFactory.InvokeMethod(instance, methodInfo, services, input.Options, input.Arguments);
@@ -73,7 +77,7 @@ namespace HakeCommand.Framework.Components.CommandLoader
             }
             catch (Exception ex)
             {
-                outputEngine.WriteError(ex);
+                context.Exception = ex;
             }
             return Task.CompletedTask;
         }

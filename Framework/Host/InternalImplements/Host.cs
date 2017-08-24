@@ -78,6 +78,12 @@ namespace HakeCommand.Framework.Host.InternalImplements
                         context = new HostContext(input, inputObject, isInPipe, index, writeDefaultValue);
                         AppDelegate app = appBuilder.Build();
                         await app(context);
+                        if (context.ErrorOccured)
+                        {
+                            output.WriteError(context.Exception);
+                            break;
+                        }
+
                         if (context.WriteResult)
                             output.WriteObject(context.Result);
                         inputObject = context.Result;

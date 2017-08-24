@@ -12,7 +12,7 @@ namespace HakeCommand.Commands
         public object GetElementAt(int index)
         {
             if (InputObject == null)
-                throw new Exception("no input data");
+                SetExceptionAndThrow(new Exception("no input data"));
 
             Type interfaceType;
             TypeInfo objectType = InputObject.GetType().GetTypeInfo();
@@ -29,21 +29,22 @@ namespace HakeCommand.Commands
                 {
                     moveNext = (bool)moveNextMethod.Invoke(enumerator, null);
                     if (!moveNext)
-                        throw new Exception("index out of range");
+                        SetExceptionAndThrow(new Exception("index out of range"));
                     if (c >= index)
                         return currentMethod.Invoke(enumerator, null);
                     c++;
                 }
             }
-            else
-                throw new Exception("data is not a set of elements");
+
+            SetExceptionAndThrow(new Exception("data is not a set of elements"));
+            return null;
         }
 
         [Command("count")]
         public int GetSetCount()
         {
             if (InputObject == null)
-                throw new Exception("no input data");
+                SetExceptionAndThrow(new Exception("no input data"));
             Type interfaceType;
             TypeInfo objectType = InputObject.GetType().GetTypeInfo();
             if ((interfaceType = objectType.GetInterface("System.Collections.IEnumerable")) != null)
@@ -63,8 +64,9 @@ namespace HakeCommand.Commands
                 }
                 return c;
             }
-            else
-                throw new Exception("data is not a set of elements");
+
+            SetExceptionAndThrow(new Exception("data is not a set of elements"));
+            return 0;
         }
 
         [Command("first")]
