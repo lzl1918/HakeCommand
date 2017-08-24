@@ -1,4 +1,6 @@
 ﻿using HakeCommand.Framework;
+using HakeCommand.Framework.Input;
+using HakeCommand.Framework.Services.OutputEngine;
 using HakeCommand.Framework.Services.VariableService;
 using System;
 using System.Collections.Generic;
@@ -9,10 +11,14 @@ namespace HakeCommand.Commands
     public sealed class VariableCommands : CommandSet
     {
         private IVariableService variableService;
+        private IHostInput hostInput;
+        private IOutputEngine outputEngine;
 
-        public VariableCommands(IVariableService variableService)
+        public VariableCommands(IVariableService variableService, IHostInput hostInput, IOutputEngine outputEngine)
         {
             this.variableService = variableService;
+            this.hostInput = hostInput;
+            this.outputEngine = outputEngine;
         }
 
         [Command("set")]
@@ -21,6 +27,11 @@ namespace HakeCommand.Commands
             value = value ?? InputObject;
             try
             {
+                if (name == null)
+                {
+                    outputEngine.WriteHint("variable name: ");
+                    name = hostInput.ReadLine();
+                }
                 return variableService.Set(name, value);
             }
             catch
@@ -34,6 +45,11 @@ namespace HakeCommand.Commands
         {
             try
             {
+                if (name == null)
+                {
+                    outputEngine.WriteHint("variable name: ");
+                    name = hostInput.ReadLine();
+                }
                 return variableService.Get(name);
             }
             catch

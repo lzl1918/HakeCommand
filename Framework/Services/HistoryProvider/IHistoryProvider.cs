@@ -6,6 +6,9 @@ namespace HakeCommand.Framework.Services.HistoryProvider
 {
     public interface IHistoryProvider
     {
-
+        void Add(string command);
+        string NextHistory();
+        string PreviousHistory();
+        void Reset();
     }
 }

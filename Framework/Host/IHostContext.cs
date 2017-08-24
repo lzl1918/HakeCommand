@@ -8,5 +8,9 @@ namespace HakeCommand.Framework.Host
         object Result { get; }
         object InputObject { get; }
         void SetResult(object result);
+        bool InPipe { get; }
+        int PipeIndex { get; }
+
+        bool WriteResult { get; set; }
     }
 }

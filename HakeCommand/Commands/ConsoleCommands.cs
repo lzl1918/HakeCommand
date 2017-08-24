@@ -22,5 +22,12 @@ namespace HakeCommand.Commands
                 throw new Exception($"directory does not exist: {path.FullName}");
             env.SetDirectory(path.FullName);
         }
+
+        [Command("slient")]
+        public void NoOutput()
+        {
+            Context.WriteResult = false;
+            Context.SetResult(Context.InputObject);
+        }
     }
 }

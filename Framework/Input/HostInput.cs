@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HakeCommand.Framework.Services.HistoryProvider;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -21,12 +22,15 @@ namespace HakeCommand.Framework.Input
         private int state;
         private Stack<int> stateStack;
         private StringBuilder textBuffer;
+        private IHistoryProvider historyProvider;
+        private string lastInputCache;
 
-        public HostInput()
+        public HostInput(IHistoryProvider historyProvider)
         {
             stateStack = new Stack<int>();
             textBuffer = new StringBuilder();
             state = 0;
+            this.historyProvider = historyProvider;
         }
 
         public string ReadLine()
@@ -65,7 +69,10 @@ namespace HakeCommand.Framework.Input
                     break;
                 }
                 else if (CharCategoryHelper.IsValidChar(keyInfo.KeyChar))
+                {
+                    Console.Write(keyInfo.KeyChar);
                     textBuffer.Append(keyInfo.KeyChar);
+                }
             }
             string result = textBuffer.ToString();
             textBuffer.Clear();
@@ -75,42 +82,82 @@ namespace HakeCommand.Framework.Input
         internal string ReadCommandLine()
         {
             int left, top;
+            lastInputCache = null;
             while (true)
             {
                 left = Console.CursorLeft;
                 top = Console.CursorTop;
                 ConsoleKeyInfo keyInfo = Console.ReadKey(true);
-                if (keyInfo.KeyChar == '\0')
-                    continue;
                 if (keyInfo.Key == ConsoleKey.Tab)
                 {
                 }
                 else if (keyInfo.Key == ConsoleKey.Backspace)
                 {
-                    left--;
-                    if (left < 0)
-                    {
-                        top--;
-                        left = Console.BufferWidth - 1;
-                    }
-                    if (top >= 0 && textBuffer.Length > 0)
-                    {
-                        textBuffer.Remove(textBuffer.Length - 1, 1);
-                        Console.SetCursorPosition(left, top);
-                        Console.Write(' ');
-                        Console.SetCursorPosition(left, top);
-                        state = stateStack.Pop();
-                    }
+                    RemoveLastChar(ref left, ref top);
+                    lastInputCache = null;
                 }
                 else if (keyInfo.Key == ConsoleKey.Enter)
                 {
                     Console.WriteLine();
                     break;
                 }
+                else if (keyInfo.Key == ConsoleKey.UpArrow)
+                {
+                    string command = historyProvider.NextHistory();
+                    if (command != null)
+                    {
+                        if (lastInputCache == null)
+                            lastInputCache = textBuffer.ToString();
+                        int length = textBuffer.Length;
+                        while (length > 0)
+                        {
+                            RemoveLastChar(ref left, ref top);
+                            length--;
+                        }
+                        state = 0;
+
+                        foreach (char commandChar in command)
+                            if (OutputConsole(commandChar))
+                                textBuffer.Append(commandChar);
+                    }
+                }
+                else if (keyInfo.Key == ConsoleKey.DownArrow)
+                {
+                    string command = historyProvider.PreviousHistory();
+                    if (command != null)
+                    {
+                        if (lastInputCache == null)
+                            lastInputCache = textBuffer.ToString();
+                    }
+                    else
+                    {
+                        command = lastInputCache;
+                    }
+
+                    if (command != null)
+                    {
+                        int length = textBuffer.Length;
+                        while (length > 0)
+                        {
+                            RemoveLastChar(ref left, ref top);
+                            length--;
+                        }
+                        state = 0;
+                        foreach (char commandChar in command)
+                            if (OutputConsole(commandChar))
+                                textBuffer.Append(commandChar);
+                    }
+                }
+
+                else if (keyInfo.KeyChar == '\0')
+                    continue;
                 else if (CharCategoryHelper.IsValidChar(keyInfo.KeyChar))
                 {
                     if (OutputConsole(keyInfo.KeyChar))
+                    {
                         textBuffer.Append(keyInfo.KeyChar);
+                        lastInputCache = null;
+                    }
                 }
             }
             string result = textBuffer.ToString();
@@ -118,6 +165,23 @@ namespace HakeCommand.Framework.Input
             state = 0;
             stateStack.Clear();
             return result;
+        }
+        private void RemoveLastChar(ref int left, ref int top)
+        {
+            left--;
+            if (left < 0)
+            {
+                top--;
+                left = Console.BufferWidth - 1;
+            }
+            if (top >= 0 && textBuffer.Length > 0)
+            {
+                textBuffer.Remove(textBuffer.Length - 1, 1);
+                Console.SetCursorPosition(left, top);
+                Console.Write(' ');
+                Console.SetCursorPosition(left, top);
+                state = stateStack.Pop();
+            }
         }
 
         private bool OutputConsole(char ch)

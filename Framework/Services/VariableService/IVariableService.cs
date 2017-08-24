@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HakeCommand.Framework.Input;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -12,16 +13,15 @@ namespace HakeCommand.Framework.Services.VariableService
     internal sealed class InternalVariableService : IVariableService
     {
         private Dictionary<string, object> variables;
-
         public InternalVariableService()
         {
             variables = new Dictionary<string, object>();
         }
-        
+
         public object Get(string name)
         {
             if (name == null)
-                throw new ArgumentNullException(nameof(name));
+                throw new Exception("missing variable name");
 
             name = name.Trim().ToLower();
             object value;
@@ -34,7 +34,7 @@ namespace HakeCommand.Framework.Services.VariableService
         public object Set(string name, object value)
         {
             if (name == null)
-                throw new ArgumentNullException(nameof(name));
+                throw new Exception("missing variable name");
 
             name = name.Trim().ToLower();
             if (name.Length <= 0)

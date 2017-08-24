@@ -26,7 +26,8 @@
         }
         public static bool IsValidChar(this char ch)
         {
-            return ch == InternalInput.ESCAPE_CHAR || ch == '|' || IsWhiteSpace(ch) || IsVaildFirstCharacter(ch) || IsChar(ch);
+            if ("|\"".IndexOf(ch) >= 0) return true;
+            return ch == InternalInput.ESCAPE_CHAR || IsWhiteSpace(ch) || IsVaildFirstCharacter(ch) || IsChar(ch);
         }
     }
 }

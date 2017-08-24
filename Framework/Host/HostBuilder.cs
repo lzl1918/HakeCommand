@@ -2,6 +2,7 @@
 using HakeCommand.Framework.Host.InternalImplements;
 using HakeCommand.Framework.Input;
 using HakeCommand.Framework.Services.Environment;
+using HakeCommand.Framework.Services.HistoryProvider;
 using HakeCommand.Framework.Services.OutputEngine;
 using HakeCommand.Framework.Services.VariableService;
 using System;
@@ -46,6 +47,8 @@ namespace HakeCommand.Framework.Host
 
         private void ConfigureInternalServices(IServiceCollection pool)
         {
+            InternalHistoryProvider historyProvider = ObjectFactory.CreateInstance<InternalHistoryProvider>(10);
+            pool.Add(ServiceDescriptor.Singleton<IHistoryProvider>(historyProvider));
             pool.Add(ServiceDescriptor.Singleton<IHostInput, HostInput>());
             pool.Add(ServiceDescriptor.Singleton<IVariableService, InternalVariableService>());
             pool.Add(ServiceDescriptor.Singleton<IAppBuilder>(appBuilder));

@@ -7,6 +7,7 @@ namespace HakeCommand.Framework.Services.OutputEngine
 {
     public interface IOutputEngine
     {
+        void WriteHint(string hint);
         void WriteObject(object result);
         void WriteError(string message);
         void WriteWarning(string message);

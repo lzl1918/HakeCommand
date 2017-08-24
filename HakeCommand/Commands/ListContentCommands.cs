@@ -16,8 +16,11 @@ namespace HakeCommand.Commands
             if (!path.Exists)
                 throw new Exception($"directory does not exist: {path.FullName}");
 
-            output.WriteObject($"{path}");
-            output.WriteObject("");
+            if (!Context.InPipe)
+            {
+                output.WriteObject($"{path}");
+                output.WriteObject("");
+            }
             var files = path.EnumerateFiles();
             var directories = path.EnumerateDirectories();
             List<FileSystemInfo> result = new List<FileSystemInfo>();

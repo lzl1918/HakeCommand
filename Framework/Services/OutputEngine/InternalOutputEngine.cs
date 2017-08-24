@@ -18,11 +18,15 @@ namespace HakeCommand.Framework.Services.OutputEngine
             Console.Clear();
         }
 
+        public void WriteHint(string hint)
+        {
+            Console.Write(hint);
+        }
         public void WriteObject(object obj)
         {
             if (obj == null)
                 return;
-            if(obj is string)
+            if (obj is string)
             {
                 Console.WriteLine(obj);
                 return;

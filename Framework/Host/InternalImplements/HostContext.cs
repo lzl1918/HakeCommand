@@ -13,15 +13,24 @@ namespace HakeCommand.Framework.Host.InternalImplements
 
         public object InputObject { get; }
 
+        public bool InPipe { get; }
+
+        public int PipeIndex { get; }
+
+        public bool WriteResult { get; set; }
+
         public void SetResult(object result)
         {
             Result = result;
         }
 
-        public HostContext(IInput command, object inputObject)
+        public HostContext(IInput command, object inputObject, bool inPipe, int pipeIndex, bool writeResultDefaultValue)
         {
             Command = command;
             InputObject = inputObject;
+            InPipe = inPipe;
+            PipeIndex = pipeIndex;
+            WriteResult = writeResultDefaultValue;
         }
     }
 }
