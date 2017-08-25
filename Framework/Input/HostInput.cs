@@ -20,16 +20,21 @@ namespace HakeCommand.Framework.Input
         public const ConsoleColor STRING_COLOR = ConsoleColor.Cyan;
 
         private int state;
+        private Stack<char> postStack;
         private Stack<int> stateStack;
         private StringBuilder textBuffer;
         private IHistoryProvider historyProvider;
         private string lastInputCache;
+        private int position;
+        private int lastPosition;
 
         public HostInput(IHistoryProvider historyProvider)
         {
             stateStack = new Stack<int>();
             textBuffer = new StringBuilder();
+            postStack = new Stack<char>();
             state = 0;
+            position = 0;
             this.historyProvider = historyProvider;
         }
 
@@ -82,7 +87,6 @@ namespace HakeCommand.Framework.Input
         internal string ReadCommandLine()
         {
             int left, top;
-            lastInputCache = null;
             while (true)
             {
                 left = Console.CursorLeft;
@@ -93,7 +97,7 @@ namespace HakeCommand.Framework.Input
                 }
                 else if (keyInfo.Key == ConsoleKey.Backspace)
                 {
-                    RemoveLastChar(ref left, ref top);
+                    RemoveChar(ref left, ref top, ref position);
                     lastInputCache = null;
                 }
                 else if (keyInfo.Key == ConsoleKey.Enter)
@@ -107,18 +111,27 @@ namespace HakeCommand.Framework.Input
                     if (command != null)
                     {
                         if (lastInputCache == null)
+                        {
                             lastInputCache = textBuffer.ToString();
+                            lastPosition = position;
+                        }
                         int length = textBuffer.Length;
+                        MoveToEnd(ref left, ref top);
                         while (length > 0)
                         {
-                            RemoveLastChar(ref left, ref top);
+                            RemoveChar(ref left, ref top, ref position);
                             length--;
                         }
                         state = 0;
-
+                        position = 0;
                         foreach (char commandChar in command)
+                        {
                             if (OutputConsole(commandChar))
+                            {
                                 textBuffer.Append(commandChar);
+                                position++;
+                            }
+                        }
                     }
                 }
                 else if (keyInfo.Key == ConsoleKey.DownArrow)
@@ -127,47 +140,168 @@ namespace HakeCommand.Framework.Input
                     if (command != null)
                     {
                         if (lastInputCache == null)
+                        {
                             lastInputCache = textBuffer.ToString();
+                            lastPosition = position;
+                        }
+                        int length = textBuffer.Length;
+                        MoveToEnd(ref left, ref top);
+                        while (length > 0)
+                        {
+                            RemoveChar(ref left, ref top, ref position);
+                            length--;
+                        }
+                        state = 0;
+                        position = 0;
+                        foreach (char commandChar in command)
+                        {
+                            if (OutputConsole(commandChar))
+                            {
+                                textBuffer.Append(commandChar);
+                                position++;
+                            }
+                        }
                     }
                     else
                     {
                         command = lastInputCache;
-                    }
-
-                    if (command != null)
-                    {
-                        int length = textBuffer.Length;
-                        while (length > 0)
+                        if (command != null)
                         {
-                            RemoveLastChar(ref left, ref top);
-                            length--;
+                            int length = textBuffer.Length;
+                            MoveToEnd(ref left, ref top);
+                            while (length > 0)
+                            {
+                                RemoveChar(ref left, ref top, ref position);
+                                length--;
+                            }
+                            state = 0;
+                            position = 0;
+                            int setleft = 0;
+                            int settop = 0;
+                            foreach (char commandChar in command)
+                            {
+                                if (OutputConsole(commandChar))
+                                {
+                                    textBuffer.Append(commandChar);
+                                    if (position == lastPosition)
+                                    {
+                                        setleft = Console.CursorLeft;
+                                        settop = Console.CursorTop;
+                                    }
+                                    position++;
+                                }
+                            }
+                            if (position == lastPosition)
+                            {
+                                setleft = Console.CursorLeft;
+                                settop = Console.CursorTop;
+                            }
+                            Console.SetCursorPosition(setleft, settop);
                         }
-                        state = 0;
-                        foreach (char commandChar in command)
-                            if (OutputConsole(commandChar))
-                                textBuffer.Append(commandChar);
                     }
                 }
-
+                else if (keyInfo.Key == ConsoleKey.LeftArrow)
+                {
+                    if (position <= 0)
+                        continue;
+                    left--;
+                    if (left < 0)
+                    {
+                        top--;
+                        left = Console.BufferWidth - 1;
+                    }
+                    Console.SetCursorPosition(left, top);
+                    position--;
+                }
+                else if (keyInfo.Key == ConsoleKey.RightArrow)
+                {
+                    if (position >= textBuffer.Length)
+                        continue;
+                    left++;
+                    if (left >= Console.BufferWidth)
+                    {
+                        top++;
+                        left = 0;
+                    }
+                    Console.SetCursorPosition(left, top);
+                    position++;
+                }
+                else if (keyInfo.Key == ConsoleKey.Delete)
+                {
+                    RemoveNextChar(ref left, ref top, ref position);
+                    lastInputCache = null;
+                }
+                else if (keyInfo.Key == ConsoleKey.Home)
+                {
+                    MoveToHome(ref left, ref top);
+                }
+                else if (keyInfo.Key == ConsoleKey.End)
+                {
+                    MoveToEnd(ref left, ref top);
+                }
                 else if (keyInfo.KeyChar == '\0')
                     continue;
                 else if (CharCategoryHelper.IsValidChar(keyInfo.KeyChar))
                 {
+                    int stackSize = stateStack.Count;
+                    int current = stackSize;
+                    while (current > position)
+                    {
+                        state = stateStack.Pop();
+                        current--;
+                    }
+
                     if (OutputConsole(keyInfo.KeyChar))
                     {
+                        current = stackSize - 1;
+                        while (current >= position)
+                        {
+                            postStack.Push(textBuffer[current]);
+                            current--;
+                        }
+                        if (postStack.Count > 0)
+                            textBuffer.Remove(position, stackSize - position);
+                        int currentLeft = Console.CursorLeft;
+                        int currentTop = Console.CursorTop;
                         textBuffer.Append(keyInfo.KeyChar);
+                        position++;
                         lastInputCache = null;
+
+                        int len = postStack.Count;
+                        char ch;
+                        int emptyCount = 0;
+                        while (len > 0)
+                        {
+                            ch = postStack.Pop();
+                            if (OutputConsole(ch))
+                                textBuffer.Append(ch);
+                            else
+                                emptyCount++;
+                            len--;
+                        }
+                        while (emptyCount > 0)
+                        {
+                            Console.Write(' ');
+                            emptyCount--;
+                        }
+                        Console.SetCursorPosition(currentLeft, currentTop);
                     }
                 }
             }
             string result = textBuffer.ToString();
             textBuffer.Clear();
             state = 0;
+            position = 0;
+            lastPosition = 0;
+            lastInputCache = null;
             stateStack.Clear();
             return result;
         }
-        private void RemoveLastChar(ref int left, ref int top)
+        private void RemoveChar(ref int left, ref int top, ref int position)
         {
+            if (position <= 0)
+                return;
+
             left--;
             if (left < 0)
             {
@@ -176,11 +310,101 @@ namespace HakeCommand.Framework.Input
             }
             if (top >= 0 && textBuffer.Length > 0)
             {
-                textBuffer.Remove(textBuffer.Length - 1, 1);
+                position--;
+                int stackSize = stateStack.Count;
+                int current = stackSize - 1;
+                while (current >= position)
+                {
+                    state = stateStack.Pop();
+                    postStack.Push(textBuffer[current]);
+                    current--;
+                }
+                postStack.Pop();
+                textBuffer.Remove(position, stackSize - position);
                 Console.SetCursorPosition(left, top);
+                int len = postStack.Count;
+                char ch;
+                int emptyCount = 0;
+                while (len > 0)
+                {
+                    ch = postStack.Pop();
+                    if (OutputConsole(ch))
+                        textBuffer.Append(ch);
+                    else
+                        emptyCount++;
+                    len--;
+                }
+                while (emptyCount > 0)
+                {
+                    Console.Write(' ');
+                    emptyCount--;
+                }
                 Console.Write(' ');
                 Console.SetCursorPosition(left, top);
+            }
+        }
+        private void RemoveNextChar(ref int left, ref int top, ref int position)
+        {
+            if (position >= textBuffer.Length || textBuffer.Length <= 0)
+                return;
+
+            int stackSize = stateStack.Count;
+            int current = stackSize - 1;
+            while (current >= position)
+            {
                 state = stateStack.Pop();
+                postStack.Push(textBuffer[current]);
+                current--;
+            }
+            postStack.Pop();
+            textBuffer.Remove(position, stackSize - position);
+            int len = postStack.Count;
+            char ch;
+            int emptyCount = 0;
+            while (len > 0)
+            {
+                ch = postStack.Pop();
+                if (OutputConsole(ch))
+                    textBuffer.Append(ch);
+                else
+                    emptyCount++;
+                len--;
+            }
+            while (emptyCount > 0)
+            {
+                Console.Write(' ');
+                emptyCount--;
+            }
+            Console.Write(' ');
+            Console.SetCursorPosition(left, top);
+        }
+        private void MoveToEnd(ref int left, ref int top)
+        {
+            int len = textBuffer.Length;
+            while (position < len)
+            {
+                left++;
+                if (left >= Console.BufferWidth)
+                {
+                    top++;
+                    left = 0;
+                }
+                Console.SetCursorPosition(left, top);
+                position++;
+            }
+        }
+        private void MoveToHome(ref int left, ref int top)
+        {
+            while (position > 0)
+            {
+                left--;
+                if (left < 0)
+                {
+                    top--;
+                    left = Console.BufferWidth - 1;
+                }
+                Console.SetCursorPosition(left, top);
+                position--;
             }
         }
 
