@@ -10,6 +10,7 @@ namespace HakeCommand.Commands
 {
     public sealed class ObjectCommands : CommandSet
     {
+        [Statement("Get the property of a object by name")]
         [Command("select")]
         public object GetProperty(string property)
         {
@@ -45,6 +46,7 @@ namespace HakeCommand.Commands
             }
         }
 
+        [Statement("Get the type name of a object")]
         [Command("type")]
         public Type GetObjectType()
         {

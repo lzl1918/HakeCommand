@@ -13,32 +13,182 @@ using System.Threading.Tasks;
 
 namespace HakeCommand.Framework.Components.CommandLoader
 {
+    public sealed class CommandParameterInfo
+    {
+        public string Name { get; }
+        public bool HasDefault { get; }
+        public string Type { get; }
+        public object DefaultValue { get; }
+        public string Statement { get; }
+        private CommandParameterInfo(string name, string type, object defaultValue, string statement)
+        {
+            Name = name;
+            Type = type;
+            HasDefault = true;
+            DefaultValue = defaultValue;
+            Statement = statement;
+        }
+        private CommandParameterInfo(string name, string type, string statement)
+        {
+            Name = name;
+            Type = type;
+            HasDefault = false;
+            DefaultValue = null;
+            Statement = statement;
+        }
+
+        public static CommandParameterInfo GetParameterInfo(ParameterInfo parameter)
+        {
+            string name = parameter.Name;
+            string type = GetTypeString(parameter.ParameterType);
+            string statement = "";
+            StatementAttribute statementAttribute = parameter.GetCustomAttribute<StatementAttribute>();
+            if (statementAttribute != null)
+                statement = statementAttribute.Statement;
+            if (parameter.HasDefaultValue)
+                return new CommandParameterInfo(name, type, parameter.DefaultValue, statement);
+            else
+                return new CommandParameterInfo(name, type, statement);
+        }
+        private static string GetTypeString(Type type)
+        {
+            if (type.Name == "String" && type.Namespace == "System")
+                return "String";
+            else if (type.IsArray)
+                return GetTypeString(type.GetElementType()) + "[]";
+            else if (type.GetInterface("System.Collections.Generic.IEnumerable`1") != null)
+                return GetTypeString(type.GetGenericArguments()[0]) + "[]";
+            else if (type.GetInterface("System.Collections.IEnumerable") != null)
+                return "Object[]";
+            else return type.Name;
+        }
+    }
+    public sealed class CommandInfo
+    {
+        private readonly static List<string> COMMAND_PARAMETER_PROPERTIES = new List<string>()
+        {
+            nameof(CommandParameterInfo.Name),
+            nameof(CommandParameterInfo.Type),
+            nameof(CommandParameterInfo.Statement)
+        };
+
+        public string Command { get; }
+        public string Statement { get; }
+        public List<CommandParameterInfo> Parameters { get; }
+
+        private CommandInfo(string command, string statement, List<CommandParameterInfo> parameters)
+        {
+            Command = command;
+            Statement = statement;
+            Parameters = parameters;
+        }
+
+        public static CommandInfo GetInfo(string command, MethodInfo method)
+        {
+            string commandStatement = method.Name;
+            StatementAttribute statementAttribute = method.GetCustomAttribute<StatementAttribute>();
+            if (statementAttribute != null)
+                commandStatement = statementAttribute.Statement;
+
+            ParameterInfo[] parameters = method.GetParameters();
+            List<CommandParameterInfo> parameterInfos = new List<CommandParameterInfo>();
+            foreach (ParameterInfo parameter in parameters)
+                parameterInfos.Add(CommandParameterInfo.GetParameterInfo(parameter));
+            return new CommandInfo(command, commandStatement, parameterInfos);
+        }
+
+        public IOutputInfo OnWrite()
+        {
+            List<IOutputBody> bodies = new List<IOutputBody>();
+            OutputBody body;
+            body = new OutputBody(new List<string>(2) { "Command", $": {Command}" });
+            bodies.Add(body);
+
+            body = new OutputBody(new List<string>(2) { "Statement", $": {Statement}" });
+            bodies.Add(body);
+
+            if (Parameters.Count > 0)
+            {
+                bodies.Add(OutputInfo.CreateFormatEnd());
+                List<IOutputBody> outputParameters = OutputInfo.RetriveProperties<CommandParameterInfo>(Parameters, COMMAND_PARAMETER_PROPERTIES, true);
+                bodies.AddRange(outputParameters);
+            }
+            return OutputInfo.Create(null, bodies, "");
+        }
+    }
+
+
     internal sealed class CommandLoader
     {
         private static readonly Type LIST_STRING_TYPE = typeof(List<string>);
         private static readonly Type LIST_DIRECTORYINFO_TYPE = typeof(List<DirectoryInfo>);
         private static readonly Type LIST_FILEINFO_TYPE = typeof(List<FileInfo>);
 
-
-        private string GetHelpContent(ICommandProvider commandProvider)
+        private List<string> GetCommandsList(ICommandProvider commandProvider)
         {
-            StringBuilder builder = new StringBuilder();
+            List<string> helps = new List<string>();
+            string content;
             foreach (var pair in commandProvider.Commands)
             {
-                builder.AppendFormat("{0}\t{1}.{2}", pair.Key, pair.Value.InstanceType.Name, pair.Value.CommandEntry.Name);
-                builder.AppendLine();
+                content = string.Format("{0}\t{1}.{2}", pair.Key, pair.Value.InstanceType.Name, pair.Value.CommandEntry.Name);
+                helps.Add(content);
             }
-            return builder.ToString();
+            return helps;
         }
+
+        private Task ProcessWithHelp(IInput input, IHostContext context, ICommandProvider commandProvider)
+        {
+            string helpCommand = null;
+            if (input.Options.TryGetValue("command", out object commandOption))
+            {
+                if (commandOption is string)
+                    helpCommand = (string)commandOption;
+                else if (commandOption is IEnumerable<string> commandEnum)
+                    helpCommand = commandEnum.FirstOrDefault();
+            }
+            if (helpCommand == null)
+            {
+                foreach (object arg in input.Arguments)
+                {
+                    if (arg is string)
+                    {
+                        helpCommand = (string)arg;
+                        break;
+                    }
+                    else if (arg is IEnumerable<string> argEnum)
+                    {
+                        helpCommand = argEnum.FirstOrDefault();
+                        if (helpCommand != null)
+                            break;
+                    }
+                }
+            }
+            if (helpCommand == null)
+                context.SetResult(GetCommandsList(commandProvider));
+            else
+            {
+                CommandRecord commandRecord = commandProvider.MatchCommandByName(helpCommand);
+                if (commandRecord == null)
+                {
+                    Exception error = new Exception($"command not found: {helpCommand}");
+                    context.Exception = error;
+                }
+                else
+                {
+                    string commandName = commandRecord.Command;
+                    MethodInfo entryMethod = commandRecord.CommandEntry;
+                    context.SetResult(CommandInfo.GetInfo(commandName, entryMethod));
+                }
+            }
+            return Task.CompletedTask;
+        }
+
         public Task Invoke(IHostContext context, Func<Task> next,
             IServiceProvider services, ICommandProvider commandProvider, IEnvironment env, IOutputEngine outputEngine, IHostInput hostInput)
         {
             IInput input = context.Command;
             if (input.Name == "help")
-            {
-                context.SetResult(GetHelpContent(commandProvider));
-                return Task.CompletedTask;
-            }
+                return ProcessWithHelp(input, context, commandProvider);
 
             CommandRecord command = commandProvider.MatchCommand(context);
             if (command == null)

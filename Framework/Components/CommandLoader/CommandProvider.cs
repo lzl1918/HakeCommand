@@ -26,6 +26,19 @@ namespace HakeCommand.Framework.Components.CommandLoader
                 return null;
         }
 
+        public CommandRecord MatchCommandByName(string command)
+        {
+            if (command == null)
+                throw new ArgumentNullException(nameof(command));
+
+            command = command.Trim().ToLower();
+            CommandRecord record;
+            if (commands.TryGetValue(command, out record))
+                return record;
+            else
+                return null;
+        }
+
         private Dictionary<string, CommandRecord> LoadCommands()
         {
             Dictionary<string, CommandRecord> commands = new Dictionary<string, CommandRecord>();

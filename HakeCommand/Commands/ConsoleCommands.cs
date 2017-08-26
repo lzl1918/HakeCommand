@@ -8,6 +8,7 @@ namespace HakeCommand.Commands
 {
     public sealed class ConsoleCommands : CommandSet
     {
+        [Statement("Clear console contents")]
         [Command("cls")]
         [Command("clear")]
         public void ClearConsole()
@@ -15,6 +16,7 @@ namespace HakeCommand.Commands
             OutputEngine.Clear();
         }
 
+        [Statement("Change the current working directory")]
         [Command("cd")]
         public void SetWorkingDirectory([Path]DirectoryInfo path)
         {
@@ -23,6 +25,7 @@ namespace HakeCommand.Commands
             Environment.SetDirectory(path.FullName);
         }
 
+        [Statement("Don't write the returned object to console")]
         [Command("slient")]
         public void NoOutput()
         {

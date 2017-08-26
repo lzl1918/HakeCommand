@@ -11,6 +11,7 @@ namespace HakeCommand.Commands
 {
     public sealed class ListContentCommands : CommandSet
     {
+        [Statement("Get items of a specific directory")]
         [Command("ls")]
         public IList<FileSystemInfo> ListContent([Path]DirectoryInfo path)
         {
@@ -30,6 +31,7 @@ namespace HakeCommand.Commands
             return result;
         }
 
+        [Statement("Show file contents")]
         [Command("cat")]
         public string ShowFileContent([Path]FileInfo file)
         {
@@ -49,10 +51,12 @@ namespace HakeCommand.Commands
             return content;
         }
 
+        [Statement("Show the specific object")]
         [Command("echo")]
         public object ShowContent(object content)
         {
             content = content ?? InputObject;
+            Context.WriteResult = true;
             return content;
         }
     }

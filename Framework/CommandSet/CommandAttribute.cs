@@ -24,4 +24,15 @@ namespace HakeCommand.Framework
     {
 
     }
+
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Parameter, AllowMultiple = false, Inherited = true)]
+    public sealed class StatementAttribute : Attribute
+    {
+        public string Statement { get; }
+        public StatementAttribute(string statement)
+        {
+            Statement = statement ?? throw new ArgumentNullException(nameof(statement));
+        }
+    }
+
 }
