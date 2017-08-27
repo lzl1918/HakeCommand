@@ -5,6 +5,7 @@ using HakeCommand.Framework.Services.HistoryProvider;
 using HakeCommand.Framework.Services.OutputEngine;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -73,6 +74,8 @@ namespace HakeCommand.Framework.Host.InternalImplements
                     bool isInPipe = inputCollection.Inputs.Count > 1;
                     bool writeDefaultValue = !isInPipe;
                     HostContext context = null;
+                    Type objectType;
+                    MethodInfo onGetMethod;
                     foreach (IInput input in inputCollection.Inputs)
                     {
                         context = new HostContext(input, inputObject, isInPipe, index, writeDefaultValue);
@@ -87,6 +90,13 @@ namespace HakeCommand.Framework.Host.InternalImplements
                         if (context.WriteResult)
                             output.WriteObject(context.Result);
                         inputObject = context.Result;
+                        if (inputObject != null)
+                        {
+                            objectType = inputObject.GetType();
+                            onGetMethod = objectType.GetMethod("OnGetValue", BindingFlags.Public | BindingFlags.Instance);
+                            if (onGetMethod != null)
+                                inputObject = ObjectFactory.InvokeMethod(inputObject, onGetMethod, services);
+                        }
                         index++;
                         if (index >= changeIndex)
                             writeDefaultValue = true;

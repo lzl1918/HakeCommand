@@ -1,5 +1,6 @@
 ﻿using HakeCommand.Framework;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
@@ -20,21 +21,15 @@ namespace HakeCommand.Commands
             if ((interfaceType = objectType.GetInterface("System.Collections.IEnumerable")) != null)
             {
                 MethodInfo getEnumeratorMethod = interfaceType.GetMethod("GetEnumerator");
-                object enumerator = getEnumeratorMethod.Invoke(InputObject, null);
-                Type enumeratorType = enumerator.GetType();
-                MethodInfo moveNextMethod = enumeratorType.GetMethod("MoveNext");
-                MethodInfo currentMethod = enumeratorType.GetProperty("Current").GetMethod;
-                bool moveNext;
+                IEnumerator enumerator = (IEnumerator)getEnumeratorMethod.Invoke(InputObject, null);
                 int c = 0;
-                while (true)
+                while (enumerator.MoveNext())
                 {
-                    moveNext = (bool)moveNextMethod.Invoke(enumerator, null);
-                    if (!moveNext)
-                        SetExceptionAndThrow(new Exception("index out of range"));
                     if (c >= index)
-                        return currentMethod.Invoke(enumerator, null);
+                        return enumerator.Current;
                     c++;
                 }
+                SetExceptionAndThrow(new Exception("index out of range"));
             }
 
             SetExceptionAndThrow(new Exception("data is not a set of elements"));
@@ -52,16 +47,10 @@ namespace HakeCommand.Commands
             if ((interfaceType = objectType.GetInterface("System.Collections.IEnumerable")) != null)
             {
                 MethodInfo getEnumeratorMethod = interfaceType.GetMethod("GetEnumerator");
-                object enumerator = getEnumeratorMethod.Invoke(InputObject, null);
-                Type enumeratorType = enumerator.GetType();
-                MethodInfo moveNextMethod = enumeratorType.GetMethod("MoveNext");
-                bool moveNext;
+                IEnumerator enumerator = (IEnumerator)getEnumeratorMethod.Invoke(InputObject, null);
                 int c = 0;
-                while (true)
+                while (enumerator.MoveNext())
                 {
-                    moveNext = (bool)moveNextMethod.Invoke(enumerator, null);
-                    if (!moveNext)
-                        break;
                     c++;
                 }
                 return c;
@@ -84,5 +73,7 @@ namespace HakeCommand.Commands
         {
             return GetElementAt(GetSetCount() - 1);
         }
+
+
     }
 }
