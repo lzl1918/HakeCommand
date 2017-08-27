@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Hake.Extension.DependencyInjection.Abstraction;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
@@ -79,6 +80,14 @@ namespace HakeCommand.Helpers
                 }
             }
             throw new PropertyNotFoundException(property, objType);
+        }
+        public static object TryGetValue(object obj)
+        {
+            Type objectType = obj.GetType();
+            MethodInfo onGetMethod = objectType.GetMethod("OnGetValue", BindingFlags.Public | BindingFlags.Instance);
+            if (onGetMethod != null)
+                obj = ObjectFactory.InvokeMethod(obj, onGetMethod);
+            return obj;
         }
     }
 }

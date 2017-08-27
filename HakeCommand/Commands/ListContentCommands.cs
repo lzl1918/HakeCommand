@@ -32,7 +32,7 @@ namespace HakeCommand.Commands
             return OutputInfo.Create(null, bodies, "");
         }
     }
-    public sealed class ItemInfoList : IList<ItemInfo>, IEnumerable<ItemInfo>, IEnumerable, ICollection<ItemInfo>
+    public sealed class ItemInfoList
     {
         public string Directory { get; }
         private IList<ItemInfo> items;
@@ -43,64 +43,7 @@ namespace HakeCommand.Commands
             this.items = items;
         }
 
-        #region Implements of IList
-        public ItemInfo this[int index] { get => items[index]; set => items[index] = value; }
-
-        public int Count => items.Count;
-
-        public bool IsReadOnly => items.IsReadOnly;
-
-        public void Add(ItemInfo item)
-        {
-            items.Add(item);
-        }
-
-        public void Clear()
-        {
-            items.Clear();
-        }
-
-        public bool Contains(ItemInfo item)
-        {
-            return items.Contains(item);
-        }
-
-        public void CopyTo(ItemInfo[] array, int arrayIndex)
-        {
-            items.CopyTo(array, arrayIndex);
-        }
-
-        public IEnumerator<ItemInfo> GetEnumerator()
-        {
-            return items.GetEnumerator();
-        }
-
-        public int IndexOf(ItemInfo item)
-        {
-            return items.IndexOf(item);
-        }
-
-        public void Insert(int index, ItemInfo item)
-        {
-            items.Insert(index, item);
-        }
-
-        public bool Remove(ItemInfo item)
-        {
-            return items.Remove(item);
-        }
-
-        public void RemoveAt(int index)
-        {
-            items.RemoveAt(index);
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return items.GetEnumerator();
-        }
-        #endregion Implements of IList
-
+        public IList<ItemInfo> OnGetValue() => items;
         public IOutputInfo OnWrite()
         {
             List<IEnumerable<string>> bodyContents = new List<IEnumerable<string>>();

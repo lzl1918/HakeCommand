@@ -130,7 +130,7 @@ namespace HakeCommand.Framework.Services.OutputEngine
                     for (int j = 0; j < count; j++)
                     {
                         sizeCount = sizeCounts[j];
-                        width = contents[j].Length;
+                        width = contents[j] == null ? 0 : contents[j].Length;
                         if (sizeCount.ContainsKey(width))
                             sizeCount[width]++;
                         else
@@ -244,6 +244,12 @@ namespace HakeCommand.Framework.Services.OutputEngine
         private void StringOrSlice(StringBuilder builder, string content, int width)
         {
             int i = 0;
+            if (content == null)
+            {
+                for (; i <= width; i++)
+                    builder.Append(' ');
+                return;
+            }
             if (content.Length <= width)
             {
                 builder.Append(content);

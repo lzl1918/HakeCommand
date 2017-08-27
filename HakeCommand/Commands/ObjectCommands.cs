@@ -5,6 +5,7 @@ using HakeCommand.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace HakeCommand.Commands
 {
@@ -28,31 +29,162 @@ namespace HakeCommand.Commands
             return OutputInfo.Create(null, bodyContents, "");
         }
     }
+    public sealed class PropertyInfo
+    {
+        public string Name { get; }
+        public object Value { get; }
+
+        public PropertyInfo(string name, object value)
+        {
+            Name = name;
+            Value = value;
+        }
+
+        public IOutputInfo OnWrite()
+        {
+            List<IEnumerable<string>> contents = new List<IEnumerable<string>>();
+            contents.Add(new string[] { "Name", $": {Name}" });
+            contents.Add(new string[] { "Value", $": {Value}" });
+            return OutputInfo.Create(null, contents, "");
+        }
+    }
+    public sealed class ObjectPropertySet
+    {
+        public IList<PropertyInfo> Properties { get; }
+
+        public ObjectPropertySet(IList<PropertyInfo> properties)
+        {
+            Properties = properties;
+        }
+
+        public IList<PropertyInfo> OnGetValue() => Properties;
+        public IOutputInfo OnWrite()
+        {
+            List<IEnumerable<string>> contents = new List<IEnumerable<string>>();
+            foreach (PropertyInfo prop in Properties)
+                contents.Add(new string[] { $"{prop.Name}", $": {prop.Value}" });
+            return OutputInfo.Create(null, contents, "");
+        }
+    }
+    public sealed class PropertyInfoList
+    {
+        public IList<ObjectPropertySet> Objects { get; }
+
+        public PropertyInfoList(IList<ObjectPropertySet> objects)
+        {
+            Objects = objects;
+        }
+
+        public IList<ObjectPropertySet> OnGetValue() => Objects;
+        public IOutputInfo OnWrite()
+        {
+            List<IEnumerable<string>> contents = new List<IEnumerable<string>>();
+            if (Objects.Count > 0)
+            {
+                string[] properties = Objects[0].Properties.Select(p => p.Name).ToArray();
+                contents.Add(properties);
+                string[] values;
+                foreach (ObjectPropertySet obj in Objects)
+                {
+                    values = obj.Properties.Select(p => p.Value?.ToString()).ToArray();
+                    contents.Add(values);
+                }
+            }
+            List<IOutputBody> bodies = OutputInfo.CreateBodies(contents);
+            if (bodies.Count > 0)
+                bodies.Insert(1, OutputInfo.CreateColumnLineSeperator());
+            return OutputInfo.Create(null, bodies, "");
+        }
+    }
 
     public sealed class ObjectCommands : CommandSet
     {
         [Statement("Get the property of a object by name")]
         [Command("select")]
-        public object GetProperty(string property)
+        public object GetProperty(string[] properties)
         {
             object obj = Context.InputObject;
             if (obj == null)
                 SetExceptionAndThrow(new Exception("no input object"));
-
-            if (string.IsNullOrWhiteSpace(property))
-                property = ReadLine("property name");
+            List<string> propertyList = new List<string>();
+            foreach (string prop in properties)
+            {
+                if (!string.IsNullOrWhiteSpace(prop))
+                    propertyList.Add(prop);
+            }
+            if (propertyList.Count <= 0)
+            {
+                string property = ReadLine("property name");
+                if (string.IsNullOrWhiteSpace(property))
+                    SetExceptionAndThrow(new Exception("invalid property name"));
+                propertyList.Add(property);
+            }
             if (ObjectHelper.IsEnumerable(obj))
             {
                 try
                 {
-                    List<object> values = new List<object>();
+                    List<ObjectPropertySet> objects = new List<ObjectPropertySet>();
+                    ObjectPropertySet objectProperty;
+                    List<PropertyInfo> propertyValues;
+                    object value;
+                    object instance;
                     foreach (object objInstance in ObjectHelper.GetElements(obj))
-                        values.Add(ObjectHelper.GetPropertyIgnoringCase(objInstance, property));
-                    return values;
+                    {
+                        instance = ObjectHelper.TryGetValue(objInstance);
+                        propertyValues = new List<PropertyInfo>();
+                        foreach (string property in propertyList)
+                        {
+                            try
+                            {
+                                value = ObjectHelper.GetPropertyIgnoringCase(instance, property);
+                            }
+                            catch
+                            {
+                                value = null;
+                            }
+                            propertyValues.Add(new PropertyInfo(property, value));
+                        }
+                        objectProperty = new ObjectPropertySet(propertyValues);
+                        objects.Add(objectProperty);
+                    }
+                    if (objects.Count > 1)
+                        return new PropertyInfoList(objects);
+                    else if (objects.Count == 1)
+                    {
+                        objectProperty = objects[0];
+                        if (objectProperty.Properties.Count > 1)
+                            return objectProperty;
+                        else if (objectProperty.Properties.Count == 1)
+                            return objectProperty.Properties[0];
+                        else
+                            return null;
+                    }
+                    else
+                        return null;
                 }
                 catch (PropertyNotFoundException)
                 {
-                    return ObjectHelper.GetPropertyIgnoringCase(obj, property);
+                    object value;
+                    List<PropertyInfo> propertyValues = new List<PropertyInfo>();
+                    foreach (string property in propertyList)
+                    {
+                        obj = ObjectHelper.TryGetValue(obj);
+                        try
+                        {
+                            value = ObjectHelper.GetPropertyIgnoringCase(obj, property);
+                        }
+                        catch
+                        {
+                            value = null;
+                        }
+                        propertyValues.Add(new PropertyInfo(property, value));
+                    }
+                    if (propertyValues.Count > 1)
+                        return new ObjectPropertySet(propertyValues);
+                    else if (propertyValues.Count == 1)
+                        return propertyValues[0];
+                    else
+                        return null;
                 }
                 catch (Exception ex)
                 {
@@ -63,7 +195,27 @@ namespace HakeCommand.Commands
             }
             else
             {
-                return ObjectHelper.GetPropertyIgnoringCase(obj, property);
+                object value;
+                List<PropertyInfo> propertyValues = new List<PropertyInfo>();
+                foreach (string property in propertyList)
+                {
+                    obj = ObjectHelper.TryGetValue(obj);
+                    try
+                    {
+                        value = ObjectHelper.GetPropertyIgnoringCase(obj, property);
+                    }
+                    catch
+                    {
+                        value = null;
+                    }
+                    propertyValues.Add(new PropertyInfo(property, value));
+                }
+                if (propertyValues.Count > 1)
+                    return new ObjectPropertySet(propertyValues);
+                else if (propertyValues.Count == 1)
+                    return propertyValues[0];
+                else
+                    return null;
             }
         }
 
@@ -76,5 +228,7 @@ namespace HakeCommand.Commands
                 SetExceptionAndThrow(new Exception("no input object"));
             return new DisplayableTypeInfo(obj.GetType());
         }
+
+
     }
 }
