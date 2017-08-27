@@ -142,42 +142,58 @@ namespace HakeCommand.Framework.Services.OutputEngine
                 {
                     sizeCount = sizeCounts[i];
                     width = 0;
-                    times = 0;
-                    maxproduct = 0;
                     foreach (var pair in sizeCount)
                     {
-                        product = pair.Value * pair.Key;
-                        if (product > maxproduct)
-                        {
-                            maxproduct = product;
-                            times = pair.Value;
+                        if (pair.Key > width)
                             width = pair.Key;
-                        }
-                        else if (product == maxproduct && width < pair.Key)
-                        {
-                            width = pair.Key;
-                            times = pair.Value;
-                        }
                     }
                     totalWidth += width;
                     columnSize.Add(width);
                 }
-                for (int i = 0; i < columnCount; i++)
+                if (totalWidth >= maxWidth)
                 {
-                    proportion = maxWidth / totalWidth;
-                    width = columnSize[i];
-                    if (width < MAX_WIDTH)
+                    totalWidth = 0;
+                    for (int i = 0; i < columnCount; i++)
                     {
-                        totalWidth -= width;
-                        maxWidth -= columnSize[i];
+                        sizeCount = sizeCounts[i];
+                        width = 0;
+                        times = 0;
+                        maxproduct = 0;
+                        foreach (var pair in sizeCount)
+                        {
+                            product = pair.Value * pair.Key;
+                            if (product > maxproduct)
+                            {
+                                maxproduct = product;
+                                times = pair.Value;
+                                width = pair.Key;
+                            }
+                            else if (product == maxproduct && width < pair.Key)
+                            {
+                                width = pair.Key;
+                                times = pair.Value;
+                            }
+                        }
+                        totalWidth += width;
+                        columnSize.Add(width);
                     }
-                    else
+                    for (int i = 0; i < columnCount; i++)
                     {
-                        columnSize[i] = Math.Max((int)(width * proportion), MAX_WIDTH);
-                        totalWidth -= width;
-                        maxWidth -= columnSize[i];
+                        proportion = maxWidth / totalWidth;
+                        width = columnSize[i];
+                        if (width < MAX_WIDTH)
+                        {
+                            totalWidth -= width;
+                            maxWidth -= columnSize[i];
+                        }
+                        else
+                        {
+                            columnSize[i] = Math.Max((int)(width * proportion), MAX_WIDTH);
+                            totalWidth -= width;
+                            maxWidth -= columnSize[i];
+                        }
+                        maxWidth--;
                     }
-                    maxWidth--;
                 }
 
                 for (index = start; index <= end; index++)
@@ -251,10 +267,7 @@ namespace HakeCommand.Framework.Services.OutputEngine
 
         public void WriteScopeBegin(IEnvironment env)
         {
-            ConsoleColor color = Console.ForegroundColor;
-            Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write($"{env.WorkingDirectory.FullName}> ");
-            Console.ForegroundColor = color;
         }
 
         public void WriteError(string message)
