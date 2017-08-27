@@ -1,11 +1,11 @@
 ﻿using HakeCommand.Framework;
 using HakeCommand.Framework.Input;
 using HakeCommand.Framework.Services.OutputEngine;
-using HakeCommand.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using HakeCommand.Framework.Helpers;
 
 namespace HakeCommand.Commands
 {
@@ -99,7 +99,7 @@ namespace HakeCommand.Commands
 
     public sealed class ObjectCommands : CommandSet
     {
-        [Statement("Get the property of a object by name")]
+        [DescriptionAttribute("Get the property of a object by name")]
         [Command("select")]
         public object GetProperty(string[] properties)
         {
@@ -126,24 +126,15 @@ namespace HakeCommand.Commands
                     List<ObjectPropertySet> objects = new List<ObjectPropertySet>();
                     ObjectPropertySet objectProperty;
                     List<PropertyInfo> propertyValues;
-                    object value;
+                    List<object> values;
                     object instance;
                     foreach (object objInstance in ObjectHelper.GetElements(obj))
                     {
                         instance = ObjectHelper.TryGetValue(objInstance);
                         propertyValues = new List<PropertyInfo>();
-                        foreach (string property in propertyList)
-                        {
-                            try
-                            {
-                                value = ObjectHelper.GetPropertyIgnoringCase(instance, property);
-                            }
-                            catch
-                            {
-                                value = null;
-                            }
-                            propertyValues.Add(new PropertyInfo(property, value));
-                        }
+                        values = ObjectHelper.GetPropertiesByNames(instance, propertyList, true);
+                        for (int i = 0; i < values.Count; i++)
+                            propertyValues.Add(new PropertyInfo(propertyList[i], values[i]));
                         objectProperty = new ObjectPropertySet(propertyValues);
                         objects.Add(objectProperty);
                     }
@@ -164,21 +155,11 @@ namespace HakeCommand.Commands
                 }
                 catch (PropertyNotFoundException)
                 {
-                    object value;
+                    List<object> values;
                     List<PropertyInfo> propertyValues = new List<PropertyInfo>();
-                    foreach (string property in propertyList)
-                    {
-                        obj = ObjectHelper.TryGetValue(obj);
-                        try
-                        {
-                            value = ObjectHelper.GetPropertyIgnoringCase(obj, property);
-                        }
-                        catch
-                        {
-                            value = null;
-                        }
-                        propertyValues.Add(new PropertyInfo(property, value));
-                    }
+                    values = ObjectHelper.GetPropertiesByNames(obj, propertyList, true);
+                    for (int i = 0; i < values.Count; i++)
+                        propertyValues.Add(new PropertyInfo(propertyList[i], values[i]));
                     if (propertyValues.Count > 1)
                         return new ObjectPropertySet(propertyValues);
                     else if (propertyValues.Count == 1)
@@ -195,21 +176,11 @@ namespace HakeCommand.Commands
             }
             else
             {
-                object value;
+                List<object> values;
                 List<PropertyInfo> propertyValues = new List<PropertyInfo>();
-                foreach (string property in propertyList)
-                {
-                    obj = ObjectHelper.TryGetValue(obj);
-                    try
-                    {
-                        value = ObjectHelper.GetPropertyIgnoringCase(obj, property);
-                    }
-                    catch
-                    {
-                        value = null;
-                    }
-                    propertyValues.Add(new PropertyInfo(property, value));
-                }
+                values = ObjectHelper.GetPropertiesByNames(obj, propertyList, true);
+                for (int i = 0; i < values.Count; i++)
+                    propertyValues.Add(new PropertyInfo(propertyList[i], values[i]));
                 if (propertyValues.Count > 1)
                     return new ObjectPropertySet(propertyValues);
                 else if (propertyValues.Count == 1)
@@ -219,7 +190,7 @@ namespace HakeCommand.Commands
             }
         }
 
-        [Statement("Get the type name of a object")]
+        [DescriptionAttribute("Get the type name of a object")]
         [Command("type")]
         public DisplayableTypeInfo GetObjectType()
         {

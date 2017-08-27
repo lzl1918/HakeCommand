@@ -26,12 +26,12 @@ namespace HakeCommand.Framework
     }
 
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Parameter, AllowMultiple = false, Inherited = true)]
-    public sealed class StatementAttribute : Attribute
+    public sealed class DescriptionAttribute : Attribute
     {
-        public string Statement { get; }
-        public StatementAttribute(string statement)
+        public string Description { get; }
+        public DescriptionAttribute(string description)
         {
-            Statement = statement ?? throw new ArgumentNullException(nameof(statement));
+            Description = description ?? throw new ArgumentNullException(nameof(description));
         }
     }
 

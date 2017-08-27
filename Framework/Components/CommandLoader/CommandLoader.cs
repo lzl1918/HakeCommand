@@ -1,4 +1,5 @@
 ﻿using Hake.Extension.DependencyInjection.Abstraction;
+using HakeCommand.Framework.Helpers;
 using HakeCommand.Framework.Host;
 using HakeCommand.Framework.Input;
 using HakeCommand.Framework.Services.Environment;
@@ -19,48 +20,50 @@ namespace HakeCommand.Framework.Components.CommandLoader
         public bool HasDefault { get; }
         public string Type { get; }
         public object DefaultValue { get; }
-        public string Statement { get; }
-        private CommandParameterInfo(string name, string type, object defaultValue, string statement)
+        public string Description { get; }
+        private CommandParameterInfo(string name, string type, object defaultValue, string description)
         {
             Name = name;
             Type = type;
             HasDefault = true;
             DefaultValue = defaultValue;
-            Statement = statement;
+            Description = description;
         }
-        private CommandParameterInfo(string name, string type, string statement)
+        private CommandParameterInfo(string name, string type, string description)
         {
             Name = name;
             Type = type;
             HasDefault = false;
             DefaultValue = null;
-            Statement = statement;
+            Description = description;
         }
 
         public static CommandParameterInfo GetParameterInfo(ParameterInfo parameter)
         {
             string name = parameter.Name;
             string type = GetTypeString(parameter.ParameterType);
-            string statement = "";
-            StatementAttribute statementAttribute = parameter.GetCustomAttribute<StatementAttribute>();
-            if (statementAttribute != null)
-                statement = statementAttribute.Statement;
+            string description = "";
+            DescriptionAttribute descriptionAttribute = parameter.GetCustomAttribute<DescriptionAttribute>();
+            if (descriptionAttribute != null)
+                description = descriptionAttribute.Description;
             if (parameter.HasDefaultValue)
-                return new CommandParameterInfo(name, type, parameter.DefaultValue, statement);
+                return new CommandParameterInfo(name, type, parameter.DefaultValue, description);
             else
-                return new CommandParameterInfo(name, type, statement);
+                return new CommandParameterInfo(name, type, description);
         }
         private static string GetTypeString(Type type)
         {
+            Type elemType;
             if (type.Name == "String" && type.Namespace == "System")
                 return "String";
             else if (type.IsArray)
                 return GetTypeString(type.GetElementType()) + "[]";
-            else if (type.GetInterface("System.Collections.Generic.IEnumerable`1") != null)
-                return GetTypeString(type.GetGenericArguments()[0]) + "[]";
-            else if (type.GetInterface("System.Collections.IEnumerable") != null)
+            else if ((elemType = TypeHelper.GetEnumerableElementType(type)) != null)
+                return GetTypeString(elemType) + "[]";
+            else if (TypeHelper.IsEnumerable(type))
                 return "Object[]";
-            else return type.Name;
+            else
+                return type.Name;
         }
     }
     public sealed class CommandInfo
@@ -69,32 +72,32 @@ namespace HakeCommand.Framework.Components.CommandLoader
         {
             nameof(CommandParameterInfo.Name),
             nameof(CommandParameterInfo.Type),
-            nameof(CommandParameterInfo.Statement)
+            nameof(CommandParameterInfo.Description)
         };
 
         public string Command { get; }
-        public string Statement { get; }
+        public string Description { get; }
         public List<CommandParameterInfo> Parameters { get; }
 
-        private CommandInfo(string command, string statement, List<CommandParameterInfo> parameters)
+        private CommandInfo(string command, string description, List<CommandParameterInfo> parameters)
         {
             Command = command;
-            Statement = statement;
+            Description = description;
             Parameters = parameters;
         }
 
         public static CommandInfo GetInfo(string command, MethodInfo method)
         {
-            string commandStatement = method.Name;
-            StatementAttribute statementAttribute = method.GetCustomAttribute<StatementAttribute>();
-            if (statementAttribute != null)
-                commandStatement = statementAttribute.Statement;
+            string commandDescription = method.Name;
+            DescriptionAttribute descriptionAttribute = method.GetCustomAttribute<DescriptionAttribute>();
+            if (descriptionAttribute != null)
+                commandDescription = descriptionAttribute.Description;
 
             ParameterInfo[] parameters = method.GetParameters();
             List<CommandParameterInfo> parameterInfos = new List<CommandParameterInfo>();
             foreach (ParameterInfo parameter in parameters)
                 parameterInfos.Add(CommandParameterInfo.GetParameterInfo(parameter));
-            return new CommandInfo(command, commandStatement, parameterInfos);
+            return new CommandInfo(command, commandDescription, parameterInfos);
         }
 
         public IOutputInfo OnWrite()
@@ -104,7 +107,7 @@ namespace HakeCommand.Framework.Components.CommandLoader
             body = new OutputBody(new List<string>(2) { "Command", $": {Command}" });
             bodies.Add(body);
 
-            body = new OutputBody(new List<string>(2) { "Statement", $": {Statement}" });
+            body = new OutputBody(new List<string>(2) { "Description", $": {Description}" });
             bodies.Add(body);
 
             if (Parameters.Count > 0)

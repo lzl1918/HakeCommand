@@ -1,4 +1,5 @@
 ﻿using Hake.Extension.DependencyInjection.Abstraction;
+using HakeCommand.Framework.Helpers;
 using HakeCommand.Framework.Services.Environment;
 using System;
 using System.Collections;
@@ -10,6 +11,10 @@ namespace HakeCommand.Framework.Services.OutputEngine
 {
     internal sealed class InternalOutputEngine : IOutputEngine
     {
+        private const int CACHE_SIZE = 20;
+        private TypedCache<MethodInfo> onWriteMethodCache = new TypedCache<MethodInfo>(CACHE_SIZE);
+        private MethodInfo GetOnWriteMethod(Type type) => type.GetMethod("OnWrite", BindingFlags.Public | BindingFlags.Instance);
+
         private readonly IServiceProvider services;
 
         public InternalOutputEngine(IServiceProvider services)
@@ -43,9 +48,9 @@ namespace HakeCommand.Framework.Services.OutputEngine
                 return;
             }
 
-            Type interfaceType;
             Type objectType = obj.GetType();
-            MethodInfo onWriteMethod = objectType.GetMethod("OnWrite", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo onWriteMethod;
+            onWriteMethodCache.TryGetItem(objectType, out onWriteMethod, GetOnWriteMethod);
             if (onWriteMethod != null)
             {
                 object retVal = ObjectFactory.InvokeMethod(obj, onWriteMethod, services);
@@ -54,10 +59,10 @@ namespace HakeCommand.Framework.Services.OutputEngine
                 WriteObject(retVal);
                 return;
             }
-            else if ((interfaceType = objectType.GetInterface("System.Collections.IEnumerable")) != null)
+            else if (TypeHelper.IsEnumerable(objectType))
             {
-                MethodInfo getEnumeratorMethod = interfaceType.GetMethod("GetEnumerator");
-                IEnumerator enumerator = (IEnumerator)getEnumeratorMethod.Invoke(obj, null);
+                IEnumerable enumerable = (IEnumerable)obj;
+                IEnumerator enumerator = enumerable.GetEnumerator();
                 while (enumerator.MoveNext())
                     WriteObject(enumerator.Current);
             }

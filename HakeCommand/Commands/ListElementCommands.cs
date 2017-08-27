@@ -1,4 +1,5 @@
 ﻿using HakeCommand.Framework;
+using HakeCommand.Framework.Helpers;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -9,19 +10,18 @@ namespace HakeCommand.Commands
 {
     public sealed class ListElementCommands : CommandSet
     {
-        [Statement("Get the element at the corresponding index")]
+        [DescriptionAttribute("Get the element at the corresponding index")]
         [Command("at")]
         public object GetElementAt(int index)
         {
             if (InputObject == null)
                 SetExceptionAndThrow(new Exception("no input data"));
 
-            Type interfaceType;
-            TypeInfo objectType = InputObject.GetType().GetTypeInfo();
-            if ((interfaceType = objectType.GetInterface("System.Collections.IEnumerable")) != null)
+            Type objectType = InputObject.GetType();
+            if (TypeHelper.IsEnumerable(objectType))
             {
-                MethodInfo getEnumeratorMethod = interfaceType.GetMethod("GetEnumerator");
-                IEnumerator enumerator = (IEnumerator)getEnumeratorMethod.Invoke(InputObject, null);
+                IEnumerable enumerable = (IEnumerable)InputObject;
+                IEnumerator enumerator = enumerable.GetEnumerator();
                 int c = 0;
                 while (enumerator.MoveNext())
                 {
@@ -31,23 +31,21 @@ namespace HakeCommand.Commands
                 }
                 SetExceptionAndThrow(new Exception("index out of range"));
             }
-
             SetExceptionAndThrow(new Exception("data is not a set of elements"));
             return null;
         }
 
-        [Statement("Get the size of a list of elements")]
+        [DescriptionAttribute("Get the size of a list of elements")]
         [Command("count")]
         public int GetSetCount()
         {
             if (InputObject == null)
                 SetExceptionAndThrow(new Exception("no input data"));
-            Type interfaceType;
-            TypeInfo objectType = InputObject.GetType().GetTypeInfo();
-            if ((interfaceType = objectType.GetInterface("System.Collections.IEnumerable")) != null)
+            Type objectType = InputObject.GetType();
+            if (TypeHelper.IsEnumerable(objectType))
             {
-                MethodInfo getEnumeratorMethod = interfaceType.GetMethod("GetEnumerator");
-                IEnumerator enumerator = (IEnumerator)getEnumeratorMethod.Invoke(InputObject, null);
+                IEnumerable enumerable = (IEnumerable)InputObject;
+                IEnumerator enumerator = enumerable.GetEnumerator();
                 int c = 0;
                 while (enumerator.MoveNext())
                 {
@@ -55,19 +53,18 @@ namespace HakeCommand.Commands
                 }
                 return c;
             }
-
             SetExceptionAndThrow(new Exception("data is not a set of elements"));
             return 0;
         }
 
-        [Statement("Get the first element of a list")]
+        [DescriptionAttribute("Get the first element of a list")]
         [Command("first")]
         public object GetFirstElement()
         {
             return GetElementAt(0);
         }
 
-        [Statement("Get the last element of a list")]
+        [DescriptionAttribute("Get the last element of a list")]
         [Command("last")]
         public object GetLastElement()
         {
