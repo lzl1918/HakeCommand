@@ -62,7 +62,7 @@ namespace HakeCommand.Commands
     }
     public sealed class ListContentCommands : CommandSet
     {
-        [DescriptionAttribute("Get items of a specific directory")]
+        [Description("Get items of a specific directory")]
         [Command("ls")]
         public ItemInfoList ListContent([Path]DirectoryInfo path)
         {
@@ -79,7 +79,7 @@ namespace HakeCommand.Commands
             return new ItemInfoList(path.FullName, result);
         }
 
-        [DescriptionAttribute("Show file contents")]
+        [Description("Show file contents")]
         [Command("cat")]
         public string ShowFileContent([Path]FileInfo file)
         {
@@ -99,7 +99,7 @@ namespace HakeCommand.Commands
             return content;
         }
 
-        [DescriptionAttribute("Show the specific object")]
+        [Description("Show the specific object")]
         [Command("echo")]
         public object ShowContent(object content)
         {

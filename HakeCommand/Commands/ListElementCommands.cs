@@ -10,7 +10,7 @@ namespace HakeCommand.Commands
 {
     public sealed class ListElementCommands : CommandSet
     {
-        [DescriptionAttribute("Get the element at the corresponding index")]
+        [Description("Get the element at the corresponding index")]
         [Command("at")]
         public object GetElementAt(int index)
         {
@@ -35,7 +35,7 @@ namespace HakeCommand.Commands
             return null;
         }
 
-        [DescriptionAttribute("Get the size of a list of elements")]
+        [Description("Get the size of a list of elements")]
         [Command("count")]
         public int GetSetCount()
         {
@@ -57,14 +57,14 @@ namespace HakeCommand.Commands
             return 0;
         }
 
-        [DescriptionAttribute("Get the first element of a list")]
+        [Description("Get the first element of a list")]
         [Command("first")]
         public object GetFirstElement()
         {
             return GetElementAt(0);
         }
 
-        [DescriptionAttribute("Get the last element of a list")]
+        [Description("Get the last element of a list")]
         [Command("last")]
         public object GetLastElement()
         {

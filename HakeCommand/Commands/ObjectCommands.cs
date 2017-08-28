@@ -99,7 +99,7 @@ namespace HakeCommand.Commands
 
     public sealed class ObjectCommands : CommandSet
     {
-        [DescriptionAttribute("Get the property of a object by name")]
+        [Description("Get the property of a object by name")]
         [Command("select")]
         public object GetProperty(string[] properties)
         {
@@ -190,7 +190,7 @@ namespace HakeCommand.Commands
             }
         }
 
-        [DescriptionAttribute("Get the type name of a object")]
+        [Description("Get the type name of a object")]
         [Command("type")]
         public DisplayableTypeInfo GetObjectType()
         {

@@ -17,7 +17,7 @@ namespace HakeCommand.Commands
             this.variableService = variableService;
         }
 
-        [DescriptionAttribute("Create a new variable, or change the existing variable")]
+        [Description("Create a new variable, or change the existing variable")]
         [Command("set")]
         public object SetVariable(string name, object value)
         {
@@ -35,7 +35,7 @@ namespace HakeCommand.Commands
             }
         }
 
-        [DescriptionAttribute("Retrive the value of a variable")]
+        [Description("Retrive the value of a variable")]
         [Command("get")]
         public object GetVariable(string name)
         {
