@@ -40,6 +40,8 @@ namespace HakeCommand.Commands
             Value = value;
         }
 
+        public object OnGetValue() => Value;
+
         public IOutputInfo OnWrite()
         {
             List<IEnumerable<string>> contents = new List<IEnumerable<string>>();

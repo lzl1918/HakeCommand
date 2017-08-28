@@ -64,6 +64,7 @@ namespace HakeCommand.Commands
     {
         [Description("Get items of a specific directory")]
         [Command("ls")]
+        [Command("dir")]
         public ItemInfoList ListContent([Path]DirectoryInfo path)
         {
             if (!path.Exists)

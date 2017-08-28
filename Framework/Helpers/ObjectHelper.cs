@@ -89,6 +89,8 @@ namespace HakeCommand.Framework.Helpers
                     return getMethod.Invoke(obj, null);
                 }
             }
+            else if (allowNull)
+                return null;
             throw new PropertyNotFoundException(property, objType);
         }
         public static List<object> GetPropertiesByNames(object obj, IEnumerable<string> properties, bool allowNull)
