@@ -1,6 +1,7 @@
 ﻿using Hake.Extension.DependencyInjection.Abstraction;
 using HakeCommand.Framework.Helpers;
 using HakeCommand.Framework.Input;
+using HakeCommand.Framework.Input.Internal;
 using HakeCommand.Framework.Services.Environment;
 using HakeCommand.Framework.Services.HistoryProvider;
 using HakeCommand.Framework.Services.OutputEngine;
@@ -11,7 +12,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace HakeCommand.Framework.Host.InternalImplements
+namespace HakeCommand.Framework.Host.Internal
 {
     internal sealed class Host : IHost
     {
@@ -59,7 +60,7 @@ namespace HakeCommand.Framework.Host.InternalImplements
                 string command = hostInput.ReadCommandLine();
                 if (command == null)
                     break;
-                IInputCollection inputCollection = InternalInput.Parse(command);
+                IInputCollection inputCollection = Input.Internal.Input.Parse(command);
                 if (inputCollection.ContainsError)
                 {
                     output.WriteError(inputCollection.ErrorMessage);

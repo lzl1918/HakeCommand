@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace HakeCommand.Framework.Host.InternalImplements
+namespace HakeCommand.Framework.Host.Internal
 {
 
     internal sealed class HostContext : IHostContext

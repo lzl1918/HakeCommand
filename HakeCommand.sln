@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.3
+VisualStudioVersion = 15.0.26730.12
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Extensions", "Extensions", "{E352EB75-0CD6-4A5F-830F-22BF2E5B6C1D}"
 EndProject
@@ -13,7 +13,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hake.Extension.DependencyIn
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hake.Extension.Pipeline", "Extensions\Pipeline\Hake.Extension.Pipeline\Hake.Extension.Pipeline.csproj", "{0A34BE72-33AB-4201-860C-93F2CB95B067}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommandTest", "CommandTest\CommandTest.csproj", "{05A8E479-9261-40BD-8B4B-0AA3F2BA2EB7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommandTest", "CommandTest\CommandTest.csproj", "{05A8E479-9261-40BD-8B4B-0AA3F2BA2EB7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hake.Extension.StateMachine", "Extensions\StateMachine\Hake.Extension.StateMachine\Hake.Extension.StateMachine.csproj", "{8C84B570-EB03-4EFA-B12F-3070A464D796}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,6 +43,10 @@ Global
 		{05A8E479-9261-40BD-8B4B-0AA3F2BA2EB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{05A8E479-9261-40BD-8B4B-0AA3F2BA2EB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{05A8E479-9261-40BD-8B4B-0AA3F2BA2EB7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C84B570-EB03-4EFA-B12F-3070A464D796}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C84B570-EB03-4EFA-B12F-3070A464D796}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C84B570-EB03-4EFA-B12F-3070A464D796}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C84B570-EB03-4EFA-B12F-3070A464D796}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -48,6 +54,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{A3F7C9FF-E269-4756-B3DB-FB4BCDEF9308} = {E352EB75-0CD6-4A5F-830F-22BF2E5B6C1D}
 		{0A34BE72-33AB-4201-860C-93F2CB95B067} = {E352EB75-0CD6-4A5F-830F-22BF2E5B6C1D}
+		{8C84B570-EB03-4EFA-B12F-3070A464D796} = {E352EB75-0CD6-4A5F-830F-22BF2E5B6C1D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {69144717-841B-4FFA-89C6-CC09A563AAF3}

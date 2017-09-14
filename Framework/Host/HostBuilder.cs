@@ -1,6 +1,7 @@
 ﻿using Hake.Extension.DependencyInjection.Abstraction;
-using HakeCommand.Framework.Host.InternalImplements;
+using HakeCommand.Framework.Host.Internal;
 using HakeCommand.Framework.Input;
+using HakeCommand.Framework.Input.Internal;
 using HakeCommand.Framework.Services.Environment;
 using HakeCommand.Framework.Services.HistoryProvider;
 using HakeCommand.Framework.Services.OutputEngine;
@@ -34,7 +35,7 @@ namespace HakeCommand.Framework.Host
 
         public IHost Build()
         {
-            return services.CreateInstance<InternalImplements.Host>();
+            return services.CreateInstance<Internal.Host>();
         }
 
         public IHostBuilder ConfigureServices(Action<IServiceProvider> configureServices)

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Hake.Extension.DependencyInjection.Abstraction;
 
-namespace HakeCommand.Framework.Host.InternalImplements
+namespace HakeCommand.Framework.Host.Internal
 {
     internal sealed class AppBuilder : IAppBuilder
     {

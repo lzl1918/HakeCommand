@@ -1,4 +1,5 @@
 using HakeCommand.Framework;
+using HakeCommand.Framework.Input.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 
@@ -13,7 +14,7 @@ namespace CommandTest
             IInputCollection inputs;
             IInput command;
             string input = "test \"test abc ` a\" a;b;`\"c;\"123` \" c -Number 123 4` 54 -t";
-            inputs = InternalInput.Parse(input);
+            inputs = Input.Parse(input);
             Assert.AreEqual(input, inputs.Raw);
             Assert.AreEqual(1, inputs.Inputs.Count);
             command = inputs.Inputs[0];
@@ -29,8 +30,24 @@ namespace CommandTest
             Assert.AreEqual(true, command.Options["t"]);
             Assert.AreEqual(2, command.Options.Count);
 
+            input = "test -t";
+            inputs = Input.Parse(input);
+            Assert.AreEqual(input, inputs.Raw);
+            Assert.AreEqual(1, inputs.Inputs.Count);
+            command = inputs.Inputs[0];
+            Assert.AreEqual(0, command.Arguments.Length);
+            Assert.AreEqual(true, command.Options["t"]);
+
+            input = "test -t ";
+            inputs = Input.Parse(input);
+            Assert.AreEqual(input, inputs.Raw);
+            Assert.AreEqual(1, inputs.Inputs.Count);
+            command = inputs.Inputs[0];
+            Assert.AreEqual(0, command.Arguments.Length);
+            Assert.AreEqual(true, command.Options["t"]);
+
             input = "test -t `\"ab;cd; - -n \"`012 34\"";
-            inputs = InternalInput.Parse(input);
+            inputs = Input.Parse(input);
             Assert.AreEqual(input, inputs.Raw);
             Assert.AreEqual(1, inputs.Inputs.Count);
             command = inputs.Inputs[0];
@@ -44,7 +61,7 @@ namespace CommandTest
             Assert.AreEqual(2, command.Options.Count);
 
             input = "test | test -| t|v `\"t| sv -a|t a; b;c;|";
-            inputs = InternalInput.Parse(input);
+            inputs = Input.Parse(input);
             Assert.AreEqual(6, inputs.Inputs.Count);
             Assert.AreEqual("test", inputs.Inputs[0].Name);
             Assert.AreEqual("test", inputs.Inputs[1].Name);
@@ -57,7 +74,7 @@ namespace CommandTest
             Assert.AreEqual(2, inputs.Inputs[5].Arguments.Length);
 
             input = "test \"t\"| test \"t\";4 -test -test2 | test t;t;t| test";
-            inputs = InternalInput.Parse(input);
+            inputs = Input.Parse(input);
             Assert.AreEqual(4, inputs.Inputs.Count);
             Assert.AreEqual("test", inputs.Inputs[0].Name);
             Assert.AreEqual(1, inputs.Inputs[0].Arguments.Length);
@@ -74,7 +91,7 @@ namespace CommandTest
             Assert.AreEqual(3, arg1.Length);
 
             input = "test t;t;t`\";\"\";\"\"| test";
-            inputs = InternalInput.Parse(input);
+            inputs = Input.Parse(input);
             Assert.AreEqual(2, inputs.Inputs.Count);
             Assert.AreEqual("test", inputs.Inputs[0].Name);
             Assert.AreEqual(1, inputs.Inputs[0].Arguments.Length);
@@ -85,7 +102,7 @@ namespace CommandTest
             Assert.AreEqual("t\"", arg1[2]);
 
             input = "test -v t -v c;t";
-            inputs = InternalInput.Parse(input);
+            inputs = Input.Parse(input);
             Assert.AreEqual(1, inputs.Inputs.Count);
             Assert.AreEqual("test", inputs.Inputs[0].Name);
             Assert.AreEqual(0, inputs.Inputs[0].Arguments.Length);
@@ -96,7 +113,7 @@ namespace CommandTest
             Assert.AreEqual("t", arg1[1]);
 
             input = "test -v t|c -v t`\"";
-            inputs = InternalInput.Parse(input);
+            inputs = Input.Parse(input);
             Assert.AreEqual(2, inputs.Inputs.Count);
             Assert.AreEqual("test", inputs.Inputs[0].Name);
             command = inputs.Inputs[0];
@@ -107,7 +124,7 @@ namespace CommandTest
             Assert.AreEqual("t\"", command.Options["v"]);
 
             input = "test -v t;|c -v t`\"";
-            inputs = InternalInput.Parse(input);
+            inputs = Input.Parse(input);
             Assert.AreEqual(2, inputs.Inputs.Count);
             Assert.AreEqual("test", inputs.Inputs[0].Name);
             command = inputs.Inputs[0];
@@ -118,7 +135,7 @@ namespace CommandTest
             Assert.AreEqual("t\"", command.Options["v"]);
 
             input = "test -v t;\"c -v t\"";
-            inputs = InternalInput.Parse(input);
+            inputs = Input.Parse(input);
             Assert.AreEqual(1, inputs.Inputs.Count);
             Assert.AreEqual("test", inputs.Inputs[0].Name);
             command = inputs.Inputs[0];
@@ -128,7 +145,7 @@ namespace CommandTest
             Assert.AreEqual("c -v t", arg1[1]);
 
             input = "test -v t;`\"c";
-            inputs = InternalInput.Parse(input);
+            inputs = Input.Parse(input);
             Assert.AreEqual(1, inputs.Inputs.Count);
             Assert.AreEqual("test", inputs.Inputs[0].Name);
             command = inputs.Inputs[0];

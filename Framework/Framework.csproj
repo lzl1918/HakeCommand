@@ -13,6 +13,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Extensions\DependencyInjection\Hake.Extension.DependencyInjection\Hake.Extension.DependencyInjection.csproj" />
     <ProjectReference Include="..\Extensions\Pipeline\Hake.Extension.Pipeline\Hake.Extension.Pipeline.csproj" />
+    <ProjectReference Include="..\Extensions\StateMachine\Hake.Extension.StateMachine\Hake.Extension.StateMachine.csproj" />
   </ItemGroup>
 
 </Project>
