@@ -237,6 +237,10 @@ namespace HakeCommand.Framework.Services.OutputEngine
                         Console.WriteLine(writerBuilder.ToString());
                         writerBuilder.Clear();
                     }
+                    else if(current is OutputEmptyLine)
+                    {
+                        Console.WriteLine();
+                    }
                 }
 
                 end++;

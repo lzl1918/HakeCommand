@@ -6,6 +6,19 @@ using System.Text;
 
 namespace HakeCommand.Framework.Input.Internal
 {
+    internal static class TransformationBuilderExtensions
+    {
+        public static ITransformationBuilder<int, char> OnPipeSymbol(this ITransformationBuilder<int, char> builder, int newState, TriggeringAction<int, char> triggeringAction)
+            => builder.OnValue(CharCategoryHelper.PIPE_CHAR, newState, triggeringAction);
+        public static ITransformationBuilder<int, char> OnPipeSymbolKeep(this ITransformationBuilder<int, char> builder, TriggeringAction<int, char> triggeringAction)
+            => builder.OnValueKeep(CharCategoryHelper.PIPE_CHAR, triggeringAction);
+
+        public static ITransformationBuilder<int, char> OnEscapeSymbol(this ITransformationBuilder<int, char> builder, int newState, TriggeringAction<int, char> triggeringAction)
+            => builder.OnValue(CharCategoryHelper.ESCAPE_CHAR, newState, triggeringAction);
+        public static ITransformationBuilder<int, char> OnEscapeSymbol(this ITransformationBuilder<int, char> builder, int newState)
+            => builder.OnValue(CharCategoryHelper.ESCAPE_CHAR, newState, null);
+    }
+
     internal static class Conditions
     {
         public static bool IsWhitespace(int state, char input) => input.IsWhitespace();
@@ -17,7 +30,6 @@ namespace HakeCommand.Framework.Input.Internal
 
     internal sealed class InputParser
     {
-
         private IStateMachine<int, char> parseMachine;
         private StringBuilder valueBuilder;
         private string name;
@@ -57,37 +69,37 @@ namespace HakeCommand.Framework.Input.Internal
             IStateMachine<int, char> stateMachine = new StateMachine<int, char>();
 
             stateMachine.Configure(0)
-                .OnCondition(Conditions.IsWhitespace, 0)
+                .OnConditionKeep(Conditions.IsWhitespace)
                 .OnCondition(Conditions.IsValidFirstCharacter, 1, AddInputToValueBuilder)
                 .OnAlways(0, ProcessSyntaxError);
 
             stateMachine.Configure(1)
                 .OnCondition(Conditions.IsWhitespace, 2, SaveCommandName)
-                .OnValue(CharCategoryHelper.PIPE_CHAR, 0, SaveCommandNameAndSaveCommand)
-                .OnCondition(Conditions.IsValidCharacter, 1, AddInputToValueBuilder)
+                .OnPipeSymbol(0, SaveCommandNameAndSaveCommand)
+                .OnConditionKeep(Conditions.IsValidCharacter, AddInputToValueBuilder)
                 .OnAlways(0, ProcessSyntaxError);
 
             stateMachine.Configure(2)
-                .OnCondition(Conditions.IsWhitespace, 2)
-                .OnValue(CharCategoryHelper.PIPE_CHAR, 0, SaveCommand)
+                .OnConditionKeep(Conditions.IsWhitespace)
+                .OnPipeSymbol(0, SaveCommand)
                 .OnCondition(Conditions.IsOptionNameStart, 3)
-                .OnValue(CharCategoryHelper.ESCAPE_CHAR, 5)
+                .OnEscapeSymbol(5)
                 .OnValue('"', 6)
                 .OnCondition(Conditions.IsValidFirstCharacter, 4, AddInputToValueBuilder)
                 .OnAlways(0, ProcessSyntaxError);
 
             stateMachine.Configure(3)
                 .OnCondition(Conditions.IsWhitespace, 2)
-                .OnValue(CharCategoryHelper.PIPE_CHAR, 0, SaveCommand)
+                .OnPipeSymbol(0, SaveCommand)
                 .OnCondition(Conditions.IsValidFirstCharacter, 8, AddInputToValueBuilder)
                 .OnAlways(0, ProcessSyntaxError);
 
             stateMachine.Configure(4)
                 .OnValue(';', 9, AddValueBuilderToValueArray)
-                .OnValue(CharCategoryHelper.PIPE_CHAR, 0, AddArgumentAndSaveCommand)
-                .OnValue(CharCategoryHelper.ESCAPE_CHAR, 5)
+                .OnPipeSymbol(0, AddArgumentAndSaveCommand)
+                .OnEscapeSymbol(5)
                 .OnCondition(Conditions.IsWhitespace, 2, AddValueBuilderToArguments)
-                .OnCondition(Conditions.IsValidCharacter, 4, AddInputToValueBuilder)
+                .OnConditionKeep(Conditions.IsValidCharacter, AddInputToValueBuilder)
                 .OnAlways(0, ProcessSyntaxError);
 
             stateMachine.Configure(5)
@@ -95,7 +107,7 @@ namespace HakeCommand.Framework.Input.Internal
 
             stateMachine.Configure(6)
                 .OnValue('"', 10)
-                .OnValue(CharCategoryHelper.ESCAPE_CHAR, 7)
+                .OnEscapeSymbol(7)
                 .OnAlways(6, AddInputToValueBuilder);
 
             stateMachine.Configure(7)
@@ -103,30 +115,30 @@ namespace HakeCommand.Framework.Input.Internal
 
             stateMachine.Configure(8)
                 .OnCondition(Conditions.IsWhitespace, 11, SaveKey)
-                .OnValue(CharCategoryHelper.PIPE_CHAR, 0, SaveKeyAndAddSwitchOptionAndSaveCommand)
-                .OnCondition(Conditions.IsValidCharacter, 8, AddInputToValueBuilder)
+                .OnPipeSymbol(0, SaveKeyAndAddSwitchOptionAndSaveCommand)
+                .OnConditionKeep(Conditions.IsValidCharacter, AddInputToValueBuilder)
                 .OnAlways(0, ProcessSyntaxError);
 
             stateMachine.Configure(9)
                 .OnCondition(Conditions.IsWhitespace, 2, SaveArguments)
-                .OnValue(CharCategoryHelper.PIPE_CHAR, 0, SaveArgumentsAndSaveCommand)
+                .OnPipeSymbol(0, SaveArgumentsAndSaveCommand)
                 .OnValue('"', 15)
-                .OnValue(';', 9)
-                .OnValue(CharCategoryHelper.ESCAPE_CHAR, 12)
+                .OnValueKeep(';')
+                .OnEscapeSymbol(12)
                 .OnCondition(Conditions.IsValidFirstCharacter, 13, AddInputToValueBuilder)
                 .OnAlways(0, ProcessSyntaxError);
 
             stateMachine.Configure(10)
                 .OnCondition(Conditions.IsWhitespace, 2, AddValueBuilderToArguments)
                 .OnValue(';', 9, AddValueBuilderToValueArray)
-                .OnValue(CharCategoryHelper.PIPE_CHAR, 0, SaveArgumentFromValueBuilderAndSaveCommand)
+                .OnPipeSymbol(0, SaveArgumentFromValueBuilderAndSaveCommand)
                 .OnAlways(0, ProcessSyntaxError);
 
             stateMachine.Configure(11)
-                .OnCondition(Conditions.IsWhitespace, 11)
-                .OnValue(CharCategoryHelper.PIPE_CHAR, 0, AddSwitchOptionAndSaveCommand)
+                .OnConditionKeep(Conditions.IsWhitespace)
+                .OnPipeSymbol(0, AddSwitchOptionAndSaveCommand)
                 .OnValue('"', 19)
-                .OnValue(CharCategoryHelper.ESCAPE_CHAR, 18)
+                .OnEscapeSymbol(18)
                 .OnCondition(Conditions.IsOptionNameStart, 3, AddSwitchOption)
                 .OnCondition(Conditions.IsValidFirstCharacter, 17, AddInputToValueBuilder)
                 .OnAlways(0, ProcessSyntaxError);
@@ -136,39 +148,39 @@ namespace HakeCommand.Framework.Input.Internal
 
             stateMachine.Configure(13)
                 .OnCondition(Conditions.IsWhitespace, 2, AddArgumentToValueArrayAndSaveArguments)
-                .OnValue(CharCategoryHelper.PIPE_CHAR, 0, AddArgumentToValueArrayAndSaveArgumentsAndSaveCommand)
+                .OnPipeSymbol(0, AddArgumentToValueArrayAndSaveArgumentsAndSaveCommand)
                 .OnValue(';', 9, AddValueBuilderToValueArray)
-                .OnValue(CharCategoryHelper.ESCAPE_CHAR, 12)
-                .OnCondition(Conditions.IsValidCharacter, 13, AddInputToValueBuilder)
+                .OnEscapeSymbol(12)
+                .OnConditionKeep(Conditions.IsValidCharacter, AddInputToValueBuilder)
                 .OnAlways(0, ProcessSyntaxError);
 
             stateMachine.Configure(14)
                 .OnValue(';', 9, AddValueBuilderToValueArray)
-                .OnValue(CharCategoryHelper.PIPE_CHAR, 0, AddArgumentToValueArrayAndSaveArgumentsAndSaveCommand)
+                .OnPipeSymbol(0, AddArgumentToValueArrayAndSaveArgumentsAndSaveCommand)
                 .OnCondition(Conditions.IsWhitespace, 2, AddArgumentToValueArrayAndSaveArguments)
                 .OnAlways(0, ProcessSyntaxError);
 
             stateMachine.Configure(15)
                 .OnValue('"', 14)
-                .OnValue(CharCategoryHelper.ESCAPE_CHAR, 16)
-                .OnAlways(15, AddInputToValueBuilder);
+                .OnEscapeSymbol(16)
+                .OnAlwaysKeep(AddInputToValueBuilder);
 
             stateMachine.Configure(16)
                 .OnAlways(15, AddInputToValueBuilder);
 
             stateMachine.Configure(17)
                 .OnCondition(Conditions.IsWhitespace, 2, SaveOptionFromValueBuilder)
-                .OnValue(CharCategoryHelper.PIPE_CHAR, 0, SaveOptionFromValueBuilderAndSaveCommand)
-                .OnValue(CharCategoryHelper.ESCAPE_CHAR, 18)
+                .OnPipeSymbol(0, SaveOptionFromValueBuilderAndSaveCommand)
+                .OnEscapeSymbol(18)
                 .OnValue(';', 21, AddValueBuilderToValueArray)
-                .OnCondition(Conditions.IsValidCharacter, 17, AddInputToValueBuilder)
+                .OnConditionKeep(Conditions.IsValidCharacter, AddInputToValueBuilder)
                 .OnAlways(0, ProcessSyntaxError);
 
             stateMachine.Configure(18)
                 .OnAlways(17, AddInputToValueBuilder);
 
             stateMachine.Configure(19)
-                .OnValue(CharCategoryHelper.ESCAPE_CHAR, 20)
+                .OnEscapeSymbol(20)
                 .OnValue('"', 22)
                 .OnAlways(19, AddInputToValueBuilder);
 
@@ -177,16 +189,16 @@ namespace HakeCommand.Framework.Input.Internal
 
             stateMachine.Configure(21)
                 .OnCondition(Conditions.IsWhitespace, 2, SaveOptionFromValueArray)
-                .OnValue(CharCategoryHelper.PIPE_CHAR, 0, SaveOptionFromValueArrayAndSaveCommand)
+                .OnPipeSymbol(0, SaveOptionFromValueArrayAndSaveCommand)
                 .OnValue('"', 26)
-                .OnValue(';', 21)
-                .OnValue(CharCategoryHelper.ESCAPE_CHAR, 23)
+                .OnValueKeep(';')
+                .OnEscapeSymbol(23)
                 .OnCondition(Conditions.IsValidFirstCharacter, 24, AddInputToValueBuilder)
                 .OnAlways(0, ProcessSyntaxError);
 
             stateMachine.Configure(22)
                 .OnValue(';', 21, AddValueBuilderToValueArray)
-                .OnValue(CharCategoryHelper.PIPE_CHAR, 0, SaveOptionFromValueBuilderAndSaveCommand)
+                .OnPipeSymbol(0, SaveOptionFromValueBuilderAndSaveCommand)
                 .OnCondition(Conditions.IsWhitespace, 2, SaveOptionFromValueBuilder)
                 .OnAlways(0, ProcessSyntaxError);
 
@@ -195,26 +207,25 @@ namespace HakeCommand.Framework.Input.Internal
 
             stateMachine.Configure(24)
                 .OnCondition(Conditions.IsWhitespace, 2, AddValueBuilderToValueArrayAndSaveOptionFromValueArray)
-                .OnValue(CharCategoryHelper.PIPE_CHAR, 0, AddValueBuilderToValueArrayAndSaveOptionFromValueArrayAndSaveCommand)
+                .OnPipeSymbol(0, AddValueBuilderToValueArrayAndSaveOptionFromValueArrayAndSaveCommand)
                 .OnValue(';', 21, AddValueBuilderToValueArray)
-                .OnValue(CharCategoryHelper.ESCAPE_CHAR, 23)
-                .OnCondition(Conditions.IsValidCharacter, 24, AddInputToValueBuilder)
+                .OnEscapeSymbol(23)
+                .OnConditionKeep(Conditions.IsValidCharacter, AddInputToValueBuilder)
                 .OnAlways(0, ProcessSyntaxError);
 
             stateMachine.Configure(25)
                 .OnValue(';', 21, AddValueBuilderToValueArray)
-                .OnValue(CharCategoryHelper.PIPE_CHAR, 0, AddValueBuilderToValueArrayAndSaveOptionFromValueArrayAndSaveCommand)
+                .OnPipeSymbol(0, AddValueBuilderToValueArrayAndSaveOptionFromValueArrayAndSaveCommand)
                 .OnCondition(Conditions.IsWhitespace, 2, AddValueBuilderToValueArrayAndSaveOptionFromValueArray)
                 .OnAlways(0, ProcessSyntaxError);
 
             stateMachine.Configure(26)
                 .OnValue('"', 25)
-                .OnValue(CharCategoryHelper.ESCAPE_CHAR, 27)
-                .OnAlways(26, AddInputToValueBuilder);
+                .OnEscapeSymbol(27)
+                .OnAlwaysKeep(AddInputToValueBuilder);
 
             stateMachine.Configure(27)
                 .OnAlways(26, AddInputToValueBuilder);
-
 
             stateMachine.OnEnding(OnEnding);
             return stateMachine;
@@ -500,134 +511,134 @@ namespace HakeCommand.Framework.Input.Internal
             IStateMachine<int, char> machine = new StateMachine<int, char>();
 
             machine.Configure(0)
-                .OnCondition(Conditions.IsWhitespace, 0, WriteCurrent)
+                .OnConditionKeep(Conditions.IsWhitespace, WriteCurrent)
                 .OnCondition(Conditions.IsValidFirstCharacter, 1, WriteCommandName)
-                .OnAlways(0, NoWrite);
+                .OnAlwaysKeep(NoWrite);
             machine.Configure(1)
                 .OnCondition(Conditions.IsWhitespace, 2, WriteCurrent)
-                .OnValue(CharCategoryHelper.PIPE_CHAR, 0, WritePipeSeperator)
-                .OnCondition(Conditions.IsValidCharacter, 1, WriteCommandName)
-                .OnAlways(1, NoWrite);
+                .OnPipeSymbol(0, WritePipeSeperator)
+                .OnConditionKeep(Conditions.IsValidCharacter, WriteCommandName)
+                .OnAlwaysKeep(NoWrite);
             machine.Configure(2)
-                .OnCondition(Conditions.IsWhitespace, 2, WriteCurrent)
-                .OnValue(CharCategoryHelper.PIPE_CHAR, 0, WritePipeSeperator)
+                .OnConditionKeep(Conditions.IsWhitespace, WriteCurrent)
+                .OnPipeSymbol(0, WritePipeSeperator)
                 .OnCondition(Conditions.IsOptionNameStart, 3, WriteParameterName)
                 .OnValue('"', 6, WriteString)
-                .OnValue(CharCategoryHelper.ESCAPE_CHAR, 5, WriteEscape)
+                .OnEscapeSymbol(5, WriteEscape)
                 .OnCondition(Conditions.IsValidFirstCharacter, 4, WriteParameter)
-                .OnAlways(2, NoWrite);
+                .OnAlwaysKeep(NoWrite);
             machine.Configure(3)
                 .OnCondition(Conditions.IsWhitespace, 2, WriteCurrent)
-                .OnValue(CharCategoryHelper.PIPE_CHAR, 0, WritePipeSeperator)
+                .OnPipeSymbol(0, WritePipeSeperator)
                 .OnCondition(Conditions.IsValidFirstCharacter, 8, WriteParameterName)
-                .OnAlways(3, NoWrite);
+                .OnAlwaysKeep(NoWrite);
             machine.Configure(4)
                 .OnValue(';', 9, WriteParameter)
-                .OnValue(CharCategoryHelper.PIPE_CHAR, 0, WritePipeSeperator)
-                .OnValue(CharCategoryHelper.ESCAPE_CHAR, 5, WriteEscape)
+                .OnPipeSymbol(0, WritePipeSeperator)
+                .OnEscapeSymbol(5, WriteEscape)
                 .OnCondition(Conditions.IsWhitespace, 2, WriteCurrent)
-                .OnCondition(Conditions.IsValidCharacter, 4, WriteParameter)
-                .OnAlways(4, NoWrite);
+                .OnConditionKeep(Conditions.IsValidCharacter, WriteParameter)
+                .OnAlwaysKeep(NoWrite);
             machine.Configure(5)
                 .OnAlways(4, WriteEscape);
             machine.Configure(6)
                 .OnValue('"', 10, WriteString)
-                .OnValue(CharCategoryHelper.ESCAPE_CHAR, 7, WriteEscape)
-                .OnAlways(6, WriteString);
+                .OnEscapeSymbol(7, WriteEscape)
+                .OnAlwaysKeep(WriteString);
             machine.Configure(7)
                 .OnAlways(6, WriteEscape);
             machine.Configure(8)
                 .OnCondition(Conditions.IsWhitespace, 11, WriteCurrent)
-                .OnValue(CharCategoryHelper.PIPE_CHAR, 0, WritePipeSeperator)
-                .OnCondition(Conditions.IsValidCharacter, 8, WriteParameterName)
-                .OnAlways(8, NoWrite);
+                .OnPipeSymbol(0, WritePipeSeperator)
+                .OnConditionKeep(Conditions.IsValidCharacter, WriteParameterName)
+                .OnAlwaysKeep(NoWrite);
             machine.Configure(9)
                 .OnCondition(Conditions.IsWhitespace, 2, WriteCurrent)
-                .OnValue(CharCategoryHelper.PIPE_CHAR, 0, WritePipeSeperator)
+                .OnPipeSymbol(0, WritePipeSeperator)
                 .OnValue('"', 15, WriteString)
-                .OnValue(';', 9, NoWrite)
-                .OnValue(CharCategoryHelper.ESCAPE_CHAR, 12, WriteEscape)
+                .OnValueKeep(';', NoWrite)
+                .OnEscapeSymbol(12, WriteEscape)
                 .OnCondition(Conditions.IsValidFirstCharacter, 13, WriteParameter)
-                .OnAlways(9, NoWrite);
+                .OnAlwaysKeep(NoWrite);
             machine.Configure(10)
                 .OnValue(';', 9, WriteParameter)
-                .OnValue(CharCategoryHelper.PIPE_CHAR, 0, WritePipeSeperator)
+                .OnPipeSymbol(0, WritePipeSeperator)
                 .OnCondition(Conditions.IsWhitespace, 2, WriteCurrent)
-                .OnAlways(10, NoWrite);
+                .OnAlwaysKeep(NoWrite);
             machine.Configure(11)
-                .OnCondition(Conditions.IsWhitespace, 11, WriteCurrent)
-                .OnValue(CharCategoryHelper.PIPE_CHAR, 0, WritePipeSeperator)
+                .OnConditionKeep(Conditions.IsWhitespace, WriteCurrent)
+                .OnPipeSymbol(0, WritePipeSeperator)
                 .OnValue('"', 19, WriteString)
-                .OnValue(CharCategoryHelper.ESCAPE_CHAR, 18, WriteEscape)
+                .OnEscapeSymbol(18, WriteEscape)
                 .OnCondition(Conditions.IsOptionNameStart, 3, WriteParameterName)
                 .OnCondition(Conditions.IsValidFirstCharacter, 17, WriteParameter)
-                .OnAlways(11, NoWrite);
+                .OnAlwaysKeep(NoWrite);
             machine.Configure(12)
                 .OnAlways(13, WriteEscape);
             machine.Configure(13)
                 .OnCondition(Conditions.IsWhitespace, 2, WriteCurrent)
-                .OnValue(CharCategoryHelper.PIPE_CHAR, 0, WritePipeSeperator)
+                .OnPipeSymbol(0, WritePipeSeperator)
                 .OnValue(';', 9, WriteParameter)
-                .OnValue(CharCategoryHelper.ESCAPE_CHAR, 12, WriteEscape)
-                .OnCondition(Conditions.IsValidCharacter, 13, WriteParameter)
-                .OnAlways(13, NoWrite);
+                .OnEscapeSymbol(12, WriteEscape)
+                .OnConditionKeep(Conditions.IsValidCharacter, WriteParameter)
+                .OnAlwaysKeep(NoWrite);
             machine.Configure(14)
                 .OnValue(';', 9, WriteParameter)
-                .OnValue(CharCategoryHelper.PIPE_CHAR, 0, WritePipeSeperator)
-                .OnCondition(Conditions.IsValidCharacter, 14, WriteParameter)
-                .OnAlways(14, NoWrite);
+                .OnPipeSymbol(0, WritePipeSeperator)
+                .OnConditionKeep(Conditions.IsValidCharacter, WriteParameter)
+                .OnAlwaysKeep(NoWrite);
             machine.Configure(15)
                 .OnValue('"', 14, WriteString)
-                .OnValue(CharCategoryHelper.ESCAPE_CHAR, 16, WriteEscape)
-                .OnAlways(15, WriteString);
+                .OnEscapeSymbol(16, WriteEscape)
+                .OnAlwaysKeep(WriteString);
             machine.Configure(16)
                 .OnAlways(15, WriteEscape);
             machine.Configure(17)
                 .OnCondition(Conditions.IsWhitespace, 2, WriteCurrent)
-                .OnValue(CharCategoryHelper.PIPE_CHAR, 0, WritePipeSeperator)
-                .OnValue(CharCategoryHelper.ESCAPE_CHAR, 18, WriteEscape)
+                .OnPipeSymbol(0, WritePipeSeperator)
+                .OnEscapeSymbol(18, WriteEscape)
                 .OnValue(';', 21, WriteParameter)
-                .OnCondition(Conditions.IsValidCharacter, 17, WriteParameter)
-                .OnAlways(17, NoWrite);
+                .OnConditionKeep(Conditions.IsValidCharacter, WriteParameter)
+                .OnAlwaysKeep(NoWrite);
             machine.Configure(18)
                 .OnAlways(17, WriteEscape);
             machine.Configure(19)
-                .OnValue(CharCategoryHelper.ESCAPE_CHAR, 20, WriteEscape)
+                .OnEscapeSymbol(20, WriteEscape)
                 .OnValue('"', 22, WriteString)
-                .OnAlways(19, WriteString);
+                .OnAlwaysKeep(WriteString);
             machine.Configure(20)
                 .OnAlways(19, WriteEscape);
             machine.Configure(21)
                 .OnCondition(Conditions.IsWhitespace, 2, WriteCurrent)
-                .OnValue(CharCategoryHelper.PIPE_CHAR, 0, WritePipeSeperator)
+                .OnPipeSymbol(0, WritePipeSeperator)
                 .OnValue('"', 26, WriteString)
-                .OnValue(';', 21, NoWrite)
-                .OnValue(CharCategoryHelper.ESCAPE_CHAR, 23, WriteEscape)
+                .OnValueKeep(';', NoWrite)
+                .OnEscapeSymbol(23, WriteEscape)
                 .OnCondition(Conditions.IsValidFirstCharacter, 24, WriteParameter)
-                .OnAlways(21, NoWrite);
+                .OnAlwaysKeep(NoWrite);
             machine.Configure(22)
                 .OnValue(';', 21, WriteParameter)
-                .OnValue(CharCategoryHelper.PIPE_CHAR, 0, WritePipeSeperator)
+                .OnPipeSymbol(0, WritePipeSeperator)
                 .OnCondition(Conditions.IsWhitespace, 2, WriteCurrent)
-                .OnAlways(22, NoWrite);
+                .OnAlwaysKeep(NoWrite);
             machine.Configure(23)
                 .OnAlways(24, WriteEscape);
             machine.Configure(24)
                 .OnCondition(Conditions.IsWhitespace, 2, WriteCurrent)
-                .OnValue(CharCategoryHelper.PIPE_CHAR, 0, WritePipeSeperator)
+                .OnPipeSymbol(0, WritePipeSeperator)
                 .OnValue(';', 21, WriteParameter)
-                .OnValue(CharCategoryHelper.ESCAPE_CHAR, 23, WriteEscape)
-                .OnCondition(Conditions.IsValidCharacter, 24, WriteParameter)
-                .OnAlways(24, NoWrite);
+                .OnEscapeSymbol(23, WriteEscape)
+                .OnConditionKeep(Conditions.IsValidCharacter, WriteParameter)
+                .OnAlwaysKeep(NoWrite);
             machine.Configure(25)
                 .OnValue(';', 21, WriteParameter)
-                .OnValue(CharCategoryHelper.PIPE_CHAR, 0, WritePipeSeperator)
+                .OnPipeSymbol(0, WritePipeSeperator)
                 .OnCondition(Conditions.IsWhitespace, 2, WriteCurrent)
-                .OnAlways(25, NoWrite);
+                .OnAlwaysKeep(NoWrite);
             machine.Configure(26)
                 .OnValue('"', 25, WriteString)
-                .OnValue(CharCategoryHelper.ESCAPE_CHAR, 27, WriteEscape)
-                .OnAlways(26, WriteString);
+                .OnEscapeSymbol(27, WriteEscape)
+                .OnAlwaysKeep(WriteString);
             machine.Configure(27)
                 .OnAlways(26, WriteEscape);
             return machine;

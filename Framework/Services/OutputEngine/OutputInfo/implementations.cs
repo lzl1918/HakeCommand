@@ -24,30 +24,39 @@ namespace HakeCommand.Framework.Services.OutputEngine
 
         public IReadOnlyList<string> Contents { get; }
     }
-    public sealed class OutputTabFormatEnd : IOutputBody
+
+    internal sealed class OutputTabFormatEnd : IOutputBody
     {
-        internal OutputTabFormatEnd()
+        public OutputTabFormatEnd()
         {
         }
 
         public IReadOnlyList<string> Contents => throw new NotImplementedException();
     }
-    public sealed class OutputLineSeperator : IOutputBody
+    internal sealed class OutputLineSeperator : IOutputBody
     {
-        internal OutputLineSeperator()
+        public OutputLineSeperator()
         {
         }
 
         public IReadOnlyList<string> Contents => throw new NotImplementedException();
     }
-    public sealed class OutputColumnLineSeperator : IOutputBody
+    internal sealed class OutputEmptyLine : IOutputBody
     {
-        internal OutputColumnLineSeperator()
+        public OutputEmptyLine()
+        {
+        }
+        public IReadOnlyList<string> Contents => throw new NotImplementedException();
+    }
+    internal sealed class OutputColumnLineSeperator : IOutputBody
+    {
+        public OutputColumnLineSeperator()
         {
         }
 
         public IReadOnlyList<string> Contents => throw new NotImplementedException();
     }
+
     public sealed class OutputFooter : IOutputFooter
     {
         internal OutputFooter(string content)
@@ -186,6 +195,10 @@ namespace HakeCommand.Framework.Services.OutputEngine
         public static IOutputBody CreateFormatEnd()
         {
             return new OutputTabFormatEnd();
+        }
+        public static IOutputBody CreateEmptyLine()
+        {
+            return new OutputEmptyLine();
         }
     }
 }

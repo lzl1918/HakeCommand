@@ -112,6 +112,8 @@ namespace HakeCommand.Framework.Components.CommandLoader
 
             if (Parameters.Count > 0)
             {
+                body = new OutputBody(new List<string>(2) { "Parameters", ":" });
+                bodies.Add(body);
                 bodies.Add(OutputInfo.CreateFormatEnd());
                 List<IOutputBody> outputParameters = OutputInfo.RetriveProperties<CommandParameterInfo>(Parameters, COMMAND_PARAMETER_PROPERTIES, true);
                 bodies.AddRange(outputParameters);
